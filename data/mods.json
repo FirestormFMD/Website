@@ -1,34 +1,8 @@
 {
   "mods": [],
-  "modpacks": [
-    {
-      "id": "anarchy-modpack-x1",
-      "name": "Anarchy Modpack X1",
-      "initials": "AM",
-      "accent": "blue",
-      "desc": "",
-      "version": "",
-      "mc": "26.2",
-      "loader": "Fabric",
-      "date": "July 7, 2026",
-      "size": "27.5 MB",
-      "file": "files/packs/anarchy-modpack-x1/Anarchy-Modpack-X1-1.0.0.mrpack",
-      "includes": []
-    }
-  ],
+  "modpacks": [],
   "resourcepacks": [],
-  "wips": [
-    {
-      "id": "nochatplus",
-      "name": "NoChatPlus",
-      "tagline": "",
-      "stage": "early",
-      "percent": 20,
-      "note": "",
-      "file": null,
-      "size": null
-    }
-  ],
+  "wips": [],
   "updates": [],
   "source": [],
   "site": {
