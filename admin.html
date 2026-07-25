@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>FMD Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1f27; --card: #212833; --card2: #262e3b; --line: rgba(255,255,255,0.08);
+    --text: #dee4ec; --muted: #8b95a5; --faint: #5f6875;
+    --blue: #58a8dd; --blue-soft: #9ecbe8; --purple: #8f77d6; --purple-soft: #b3a1e6;
+    --green: #7fc08a; --red: #e07a6a; --amber: #e0a86a;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Instrument Sans', system-ui, sans-serif; min-height: 100vh; }
+  a { color: var(--blue); }
+  h1, h2, h3 { letter-spacing: -0.02em; }
+  button { font-family: inherit; }
+  input, textarea, select {
+    width: 100%; background: #171c23; color: var(--text); border: 1px solid var(--line);
+    border-radius: 7px; padding: 8px 10px; font-family: inherit; font-size: 13.5px;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: rgba(88,168,221,0.5); }
+  textarea { resize: vertical; min-height: 70px; line-height: 1.55; }
+  label { display: block; font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 6px; }
+  label .hint { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--faint); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--card2);
+    color: var(--text); font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+  }
+  .btn:hover { border-color: rgba(88,168,221,0.45); }
+  .btn.primary { background: linear-gradient(100deg,#4f9ed4,#7e68c9); color: #0f141b; font-weight: 600; border: none; }
+  .btn.primary:disabled { opacity: 0.45; cursor: default; }
+  .btn.danger { color: var(--red); }
+  .btn.danger:hover { border-color: rgba(224,122,106,0.5); }
+  .btn.small { font-size: 12px; padding: 5px 11px; border-radius: 7px; }
+  .mono { font-family: var(--mono); }
+  .pill { font-family: var(--mono); font-size: 11px; border-radius: 5px; padding: 2px 7px; }
+  .pill.blue { color: var(--blue-soft); background: rgba(88,168,221,0.1); }
+  .pill.purple { color: var(--purple-soft); background: rgba(143,119,214,0.12); }
+  .pill.green { color: var(--green); background: rgba(127,192,138,0.12); }
+  .pill.red { color: var(--red); background: rgba(224,122,106,0.12); }
+  .pill.amber { color: var(--amber); background: rgba(224,168,106,0.12); }
+
+  header.topbar {
+    display: flex; align-items: center; gap: 14px; padding: 0 28px; height: 58px;
+    border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 20;
+  }
+  .accentline { height: 2px; background: linear-gradient(90deg, rgba(88,168,221,0.55), rgba(143,119,214,0.55), rgba(88,168,221,0) 85%); }
+  main { max-width: 880px; margin: 0 auto; padding: 34px 28px 80px; }
+  .tabs { display: flex; gap: 6px; margin: 22px 0 26px; flex-wrap: wrap; }
+  .tab { font-size: 13px; padding: 7px 15px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); cursor: pointer; background: transparent; }
+  .tab.active { color: var(--blue-soft); border-color: rgba(88,168,221,0.45); background: rgba(88,168,221,0.08); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 22px; margin-bottom: 12px; }
+  .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .row .grow { flex: 1; min-width: 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .faint { color: var(--faint); font-size: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 18px; }
+  @media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .overlay { position: fixed; inset: 0; background: rgba(10,13,18,0.72); z-index: 50; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 40px 16px; }
+  .modal { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 26px 28px 28px; width: 100%; max-width: 640px; }
+  .modal h2 { margin: 0 0 4px; font-size: 20px; }
+
+  .filebox { border: 1px dashed rgba(255,255,255,0.16); border-radius: 9px; padding: 12px 14px; margin-top: 6px; }
+  .status { font-size: 12.5px; color: var(--muted); }
+  .status.err { color: var(--red); }
+  .status.ok { color: var(--green); }
+  #toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--card2);
+    border: 1px solid var(--line); border-radius: 9px; padding: 10px 18px; font-size: 13px; z-index: 99;
+    display: none; max-width: 80vw;
+  }
+  #toast.err { color: var(--red); border-color: rgba(224,122,106,0.4); }
+  #toast.ok { color: var(--green); border-color: rgba(127,192,138,0.35); }
+  code { font-family: var(--mono); font-size: 12px; color: var(--blue-soft); background: rgba(88,168,221,0.08); padding: 1px 5px; border-radius: 4px; }
+  details { margin-top: 14px; font-size: 13px; color: var(--muted); }
+  details summary { cursor: pointer; color: var(--blue); }
+  details li { margin: 6px 0; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span style="font-weight:600;font-size:15px">FMD Admin</span>
+  <span class="mono faint" id="repoLabel"></span>
+  <span style="margin-left:auto"></span>
+  <span class="status" id="saveStatus"></span>
+  <button class="btn primary" id="saveBtn" disabled>Save &amp; publish</button>
+  <button class="btn" id="logoutBtn" style="display:none">Log out</button>
+  <a href="index.html" class="faint" style="text-decoration:none">View site →</a>
+</header>
+<div class="accentline"></div>
+
+<main id="app"></main>
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+/* ================= Config ================= */
+const OWNER = "FirestormFMD";
+const REPO = "FirestormFMD-Website";
+const BRANCH = "main";
+const DATA_PATH = "data/mods.json";
+const API = "https://api.github.com";
+const MAX_UPLOAD = 45 * 1024 * 1024; // GitHub contents API tops out around 50 MB
+
+/* ================= State ================= */
+let token = null;
+let db = null;        // parsed data/mods.json
+let dataSha = null;   // blob sha of data/mods.json for updates
+let dirty = false;
+let activeTab = "mods";
+
+/* ================= Small helpers ================= */
+const $ = (sel, el) => (el || document).querySelector(sel);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function toast(msg, cls) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = cls || "";
+  t.style.display = "block";
+  clearTimeout(t._h);
+  t._h = setTimeout(() => { t.style.display = "none"; }, 4200);
+}
+
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function todayStr() {
+  return new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+function slugify(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "item";
+}
+
+function sanitizeFilename(name) {
+  return String(name).replace(/[^A-Za-z0-9._+-]+/g, "-").replace(/^-+|-+$/g, "") || "file";
+}
+
+function lines(text) { return String(text).split("\n").map(s => s.trim()).filter(Boolean); }
+
+function parseDeps(text) {
+  // one per line: "Fabric API | >= 0.102.0"
+  return lines(text).map(l => {
+    const i = l.indexOf("|");
+    return i >= 0 ? { name: l.slice(0, i).trim(), ver: l.slice(i + 1).trim() } : { name: l.trim(), ver: "" };
+  });
+}
+function depsToText(deps) { return (deps || []).map(d => d.name + (d.ver ? " | " + d.ver : "")).join("\n"); }
+
+function markDirty() {
+  dirty = true;
+  $("#saveBtn").disabled = false;
+  $("#saveStatus").textContent = "Unsaved changes";
+  $("#saveStatus").className = "status";
+}
+function markClean(msg) {
+  dirty = false;
+  $("#saveBtn").disabled = true;
+  $("#saveStatus").textContent = msg || "";
+  $("#saveStatus").className = "status ok";
+}
+
+window.addEventListener("beforeunload", (e) => {
+  if (dirty) { e.preventDefault(); e.returnValue = ""; }
+});
+
+/* ================= Base64 (unicode + binary safe) ================= */
+function b64FromBytes(bytes) {
+  let bin = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
+}
+function b64EncodeText(str) { return b64FromBytes(new TextEncoder().encode(str)); }
+function b64DecodeText(b64) {
+  const bin = atob(String(b64).replace(/\s/g, ""));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+/* ================= GitHub API ================= */
+async function gh(path, opts) {
+  opts = opts || {};
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(opts.headers || {})
+    }
+  });
+  if (!res.ok) {
+    let detail = "";
+    try { detail = (await res.json()).message || ""; } catch (_) {}
+    const err = new Error("GitHub " + res.status + (detail ? ": " + detail : ""));
+    err.status = res.status;
+    throw err;
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+const contentsUrl = (path) => "/repos/" + OWNER + "/" + REPO + "/contents/" + path.split("/").map(encodeURIComponent).join("/");
+
+async function getFile(path) {
+  return gh(contentsUrl(path) + "?ref=" + BRANCH);
+}
+async function getFileShaOrNull(path) {
+  try { return (await getFile(path)).sha; }
+  catch (e) { if (e.status === 404) return null; throw e; }
+}
+async function putFile(path, contentB64, message, sha) {
+  const body = { message, content: contentB64, branch: BRANCH };
+  if (sha) body.sha = sha;
+  return gh(contentsUrl(path), { method: "PUT", body: JSON.stringify(body) });
+}
+async function deleteRepoFile(path, sha, message) {
+  return gh(contentsUrl(path), { method: "DELETE", body: JSON.stringify({ message, sha, branch: BRANCH }) });
+}
+async function listDirOrEmpty(path) {
+  try {
+    const r = await gh(contentsUrl(path) + "?ref=" + BRANCH);
+    return Array.isArray(r) ? r : [];
+  } catch (e) { if (e.status === 404) return []; throw e; }
+}
+
+/* ================= Data load / save ================= */
+// Hues the site's theme can be accented with — the Mantine-style ramps the
+// site bundle carries. Keep in sync with RAMPS in the site source.
+const ACCENTS = [
+  ["red", "#fa5252"], ["pink", "#e64980"], ["grape", "#be4bdb"], ["violet", "#7950f2"],
+  ["indigo", "#4c6ef5"], ["blue", "#228be6"], ["cyan", "#15aabf"], ["teal", "#12b886"],
+  ["green", "#40c057"], ["lime", "#82c91e"], ["yellow", "#fab005"], ["orange", "#fd7e14"]
+];
+
+const SITE_DEFAULTS = {
+  name: "FirestormFMD",
+  title: "FirestormFMD",
+  tagline: "Mods, tools and updates for Minecraft — everything beyond the Modrinth page lives here.",
+  // Appearance a first-time visitor lands on. The site has its own light/dark +
+  // accent picker, and a visitor's choice is remembered in their browser and
+  // outranks these, so changing them only affects people who haven't picked.
+  defaultMode: "dark",
+  defaultAccent: "blue",
+  homeLayout: "hero",
+  // Which tabs the public Downloads page offers.
+  showMods: true,
+  showModpacks: true,
+  showResourcePacks: true
+};
+
+const RETIRED_SITE_KEYS = ["font", "bg", "textColor", "titleColor", "titleSize", "taglineColor", "taglineSize", "align"];
+
+async function loadData() {
+  const f = await getFile(DATA_PATH);
+  dataSha = f.sha;
+  db = JSON.parse(b64DecodeText(f.content));
+  ["mods", "modpacks", "resourcepacks", "wips", "updates", "bugs", "source"].forEach(k => { if (!Array.isArray(db[k])) db[k] = []; });
+  db.site = { ...SITE_DEFAULTS, ...(db.site || {}) };
+  // Per-element colours and fonts predate the site's theme system, which now
+  // derives everything from the colour mode + accent. Drop them on the next
+  // save so the file stops carrying settings nothing reads.
+  RETIRED_SITE_KEYS.forEach(k => delete db.site[k]);
+}
+
+async function saveData(message) {
+  const content = b64EncodeText(JSON.stringify(db, null, 2) + "\n");
+  try {
+    const res = await putFile(DATA_PATH, content, message, dataSha);
+    dataSha = res.content.sha;
+  } catch (e) {
+    if (e.status === 409 || e.status === 422) {
+      // sha went stale (edited elsewhere) — refetch and retry once
+      dataSha = await getFileShaOrNull(DATA_PATH);
+      const res = await putFile(DATA_PATH, content, message, dataSha);
+      dataSha = res.content.sha;
+    } else { throw e; }
+  }
+}
+
+$("#saveBtn").addEventListener("click", async () => {
+  const btn = $("#saveBtn");
+  btn.disabled = true;
+  $("#saveStatus").textContent = "Saving…";
+  $("#saveStatus").className = "status";
+  try {
+    await saveData("Update site content via admin panel");
+    markClean("Published ✓ (Pages updates in ~1 min)");
+    toast("Saved. GitHub Pages will redeploy in about a minute.", "ok");
+  } catch (e) {
+    btn.disabled = false;
+    $("#saveStatus").textContent = "Save failed";
+    $("#saveStatus").className = "status err";
+    toast(String(e.message || e), "err");
+  }
+});
+
+/* ================= File uploads ================= */
+function readAsBytes(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(new Uint8Array(r.result));
+    r.onerror = () => rej(r.error);
+    r.readAsArrayBuffer(file);
+  });
+}
+
+// Uploads (commits) a file into the repo and returns { path, size }.
+async function uploadFile(kind, ownerId, file, statusEl) {
+  if (file.size > MAX_UPLOAD) {
+    throw new Error("File is " + fmtSize(file.size) + " — over the ~45 MB GitHub API limit. Host it elsewhere and paste the URL instead.");
+  }
+  const path = "files/" + kind + "/" + ownerId + "/" + sanitizeFilename(file.name);
+  if (statusEl) statusEl.textContent = "Encoding " + fmtSize(file.size) + "…";
+  const b64 = b64FromBytes(await readAsBytes(file));
+  if (statusEl) statusEl.textContent = "Uploading to GitHub…";
+  const sha = await getFileShaOrNull(path);
+  await putFile(path, b64, (sha ? "Replace " : "Upload ") + path, sha);
+  if (statusEl) statusEl.textContent = "Uploaded ✓ " + path;
+  return { path, size: fmtSize(file.size) };
+}
+
+// Delete every uploaded file under files/<kind>/<id>/ (used when removing an item).
+async function deleteItemFiles(kind, ownerId) {
+  const entries = await listDirOrEmpty("files/" + kind + "/" + ownerId);
+  for (const f of entries) {
+    if (f.type === "file") await deleteRepoFile(f.path, f.sha, "Remove " + f.path);
+  }
+  return entries.length;
+}
+
+/* ================= Login ================= */
+function renderLogin(msg) {
+  $("#logoutBtn").style.display = "none";
+  $("#repoLabel").textContent = "";
+  $("#app").innerHTML = `
+    <div style="max-width:460px;margin:60px auto 0">
+      <h1 style="font-size:26px;margin:0">Owner sign-in</h1>
+      <p class="muted" style="line-height:1.6">This panel commits directly to
+        <span class="mono" style="font-size:12px">${OWNER}/${REPO}</span>. Only someone with a GitHub
+        token for that repo — i.e. you — can change anything.</p>
+      ${msg ? `<p class="status err">${esc(msg)}</p>` : ""}
+      <div class="card" style="margin-top:20px">
+        <label>GitHub personal access token</label>
+        <input type="password" id="tokenInput" placeholder="github_pat_… or ghp_…" autocomplete="off">
+        <div class="row" style="margin-top:12px">
+          <label style="margin:0;display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted);font-size:13px">
+            <input type="checkbox" id="rememberTok" style="width:auto"> Remember on this device
+          </label>
+          <span style="margin-left:auto"></span>
+          <button class="btn primary" id="loginBtn">Unlock</button>
+        </div>
+      </div>
+      <details>
+        <summary>How to create the token (one-time setup)</summary>
+        <ol>
+          <li>GitHub → Settings → Developer settings → <b>Fine-grained personal access tokens</b> → Generate new token.</li>
+          <li>Repository access: <b>Only select repositories</b> → <code>${REPO}</code>.</li>
+          <li>Permissions → Repository permissions → <b>Contents: Read and write</b>. Nothing else.</li>
+          <li>Pick an expiry you're comfortable with, generate, and paste it here.</li>
+        </ol>
+        <p>Only tick "remember" on your own computer — the token is stored in this browser's localStorage.</p>
+      </details>
+    </div>`;
+  $("#loginBtn").addEventListener("click", doLogin);
+  $("#tokenInput").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
+}
+
+async function doLogin() {
+  const t = $("#tokenInput").value.trim();
+  if (!t) return;
+  token = t;
+  $("#loginBtn").textContent = "Checking…";
+  try {
+    const repo = await gh("/repos/" + OWNER + "/" + REPO);
+    if (!repo.permissions || !repo.permissions.push) {
+      throw new Error("Token works but has no write access to " + OWNER + "/" + REPO + ".");
+    }
+    if ($("#rememberTok").checked) localStorage.setItem("fmd_admin_token", t);
+    await loadData();
+    renderApp();
+  } catch (e) {
+    token = null;
+    renderLogin(String(e.message || e));
+  }
+}
+
+$("#logoutBtn").addEventListener("click", () => {
+  if (dirty && !confirm("You have unsaved changes. Log out anyway?")) return;
+  localStorage.removeItem("fmd_admin_token");
+  token = null; db = null; dirty = false;
+  markClean("");
+  renderLogin();
+});
+
+/* ================= Main app shell ================= */
+const TABS = [
+  ["mods", "Mods"], ["modpacks", "Modpacks"], ["resourcepacks", "Resource Packs"],
+  ["wips", "WIPs"], ["updates", "Updates"], ["bugs", "Bugs"], ["source", "Source"],
+  ["site", "Site"], ["json", "Raw JSON"]
+];
+
+function renderApp() {
+  $("#logoutBtn").style.display = "";
+  $("#repoLabel").textContent = OWNER + "/" + REPO + " @ " + BRANCH;
+  const app = $("#app");
+  app.innerHTML = `
+    <h1 style="font-size:26px;margin:0">Site content</h1>
+    <p class="muted" style="margin:8px 0 0;line-height:1.6">Edit below, then hit <b>Save &amp; publish</b>.
+      File uploads commit immediately; everything else commits on save.</p>
+    <div class="tabs">${TABS.map(([k, l]) => `<button class="tab ${k === activeTab ? "active" : ""}" data-tab="${k}">${l}</button>`).join("")}</div>
+    <div id="tabBody"></div>`;
+  app.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { activeTab = b.dataset.tab; renderApp(); }));
+  renderTab();
+}
+
+function renderTab() {
+  const body = $("#tabBody");
+  if (activeTab === "mods") renderMods(body);
+  else if (activeTab === "modpacks") renderModpacks(body);
+  else if (activeTab === "resourcepacks") renderResourcepacks(body);
+  else if (activeTab === "wips") renderWips(body);
+  else if (activeTab === "updates") renderUpdates(body);
+  else if (activeTab === "bugs") renderBugs(body);
+  else if (activeTab === "source") renderSource(body);
+  else if (activeTab === "site") renderSite(body);
+  else renderRawJson(body);
+}
+
+/* ================= Modal helper ================= */
+function openModal(html) {
+  closeModal();
+  const ov = document.createElement("div");
+  ov.className = "overlay";
+  ov.id = "modalOverlay";
+  ov.innerHTML = `<div class="modal">${html}</div>`;
+  ov.addEventListener("mousedown", (e) => { if (e.target === ov) closeModal(); });
+  document.body.appendChild(ov);
+  return ov;
+}
+function closeModal() { const m = $("#modalOverlay"); if (m) m.remove(); }
+
+/* Shared file-upload widget inside modals.
+   getRef() must return the object holding the value; kind/id give the repo folder.
+   opts lets one modal hold several widgets and target different properties:
+     wid       — DOM scope id, must be unique within the modal (default "file")
+     field     — property to write the path/URL into      (default "file")
+     sizeField — property to write the human size into, null to skip ("size")
+     accept / btnLabel / hint / preview — cosmetics; preview shows a thumbnail. */
+function fileWidgetOpts(opts) {
+  opts = opts || {};
+  return {
+    wid: opts.wid || "file",
+    field: opts.field || "file",
+    sizeField: "sizeField" in opts ? opts.sizeField : "size",
+    accept: opts.accept || "",
+    btnLabel: opts.btnLabel || "Upload file…",
+    hint: opts.hint || "uploaded to this repo, or paste an external URL",
+    preview: !!opts.preview
+  };
+}
+
+function fileWidgetHtml(obj, label, opts) {
+  const o = fileWidgetOpts(opts);
+  const cur = obj ? obj[o.field] : null;
+  const sizeTxt = o.sizeField && obj && obj[o.sizeField] ? " (" + esc(obj[o.sizeField]) + ")" : "";
+  return `
+    <label>${label || "File"} <span class="hint">— ${o.hint}</span></label>
+    <div class="filebox" data-widget="${o.wid}">
+      <div class="row">
+        ${o.preview ? `<img data-role="filePreview" src="${cur ? esc(cur) : ""}" alt="" style="width:38px;height:38px;border-radius:9px;object-fit:cover;flex:none;border:1px solid var(--line);background:#171c23${cur ? "" : ";display:none"}">` : ""}
+        <span class="grow status" data-role="fileLabel">${cur ? "Current: " + esc(cur) + sizeTxt : "No file yet"}</span>
+        <input type="file" data-role="filePick" style="display:none"${o.accept ? ` accept="${o.accept}"` : ""}>
+        <button class="btn small" type="button" data-role="fileBtn">${o.btnLabel}</button>
+        <button class="btn small danger" type="button" data-role="fileClear" ${cur ? "" : "disabled"}>Clear</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input type="text" data-role="fileUrl" placeholder="https://… (external link instead of upload)" value="${cur && /^https?:/.test(cur) ? esc(cur) : ""}" style="flex:1">
+        <button class="btn small" type="button" data-role="fileUrlSet">Use URL</button>
+      </div>
+      <div class="status" data-role="fileStatus" style="margin-top:6px"></div>
+    </div>`;
+}
+
+/* getId is called at upload time so brand-new items can derive their folder
+   from the name field the user just typed. Returning null blocks the upload. */
+function wireFileWidget(root, kind, getId, getRef, onChange, opts) {
+  const o = fileWidgetOpts(opts);
+  const box = root.querySelector(`[data-widget="${o.wid}"]`);
+  const q = (role) => box.querySelector(`[data-role="${role}"]`);
+  const pick = q("filePick");
+  const statusEl = q("fileStatus");
+  const labelEl = q("fileLabel");
+  const preview = q("filePreview");
+  const showPreview = (url) => {
+    if (!preview) return;
+    preview.src = url || "";
+    preview.style.display = url ? "" : "none";
+  };
+  q("fileBtn").addEventListener("click", () => {
+    if (!getId()) { toast("Give it a name first — the name decides the upload folder.", "err"); return; }
+    pick.click();
+  });
+  pick.addEventListener("change", async () => {
+    const f = pick.files[0];
+    if (!f) return;
+    try {
+      const { path, size } = await uploadFile(kind, getId(), f, statusEl);
+      const ref = getRef();
+      ref[o.field] = path;
+      if (o.sizeField) ref[o.sizeField] = size;
+      labelEl.textContent = "Current: " + path + (o.sizeField ? " (" + size + ")" : "");
+      q("fileClear").disabled = false;
+      showPreview(path);
+      statusEl.className = "status ok";
+      if (onChange) onChange();
+    } catch (e) {
+      statusEl.textContent = String(e.message || e);
+      statusEl.className = "status err";
+    }
+  });
+  q("fileClear").addEventListener("click", () => {
+    getRef()[o.field] = null;
+    labelEl.textContent = "No file yet";
+    q("fileClear").disabled = true;
+    showPreview(null);
+    statusEl.textContent = "Cleared (the uploaded file stays in the repo until you delete the item).";
+    statusEl.className = "status";
+    if (onChange) onChange();
+  });
+  q("fileUrlSet").addEventListener("click", () => {
+    const url = q("fileUrl").value.trim();
+    if (!/^https?:\/\//.test(url)) { statusEl.textContent = "Enter a full http(s):// URL."; statusEl.className = "status err"; return; }
+    getRef()[o.field] = url;
+    labelEl.textContent = "Current: " + url;
+    q("fileClear").disabled = false;
+    showPreview(url);
+    statusEl.textContent = "External URL set.";
+    statusEl.className = "status ok";
+    if (onChange) onChange();
+  });
+}
+
+/* Icon widget preset — an image that replaces the initials tile on the site. */
+const ICON_OPTS = {
+  wid: "icon", field: "icon", sizeField: null, accept: "image/*",
+  btnLabel: "Upload image…", preview: true,
+  hint: "replaces the initials tile; square PNG looks best. Leave empty to keep initials"
+};
+function iconWidgetHtml(obj) { return fileWidgetHtml(obj, "Icon image (optional)", ICON_OPTS); }
+function wireIconWidget(modal, kind, getId, getRef) { wireFileWidget(modal, kind, getId, getRef, null, ICON_OPTS); }
+
+/* ================= Mods tab ================= */
+function renderMods(body) {
+  body.innerHTML = `
+    <div class="row" style="margin-bottom:16px">
+      <span class="muted">Each mod has a featured (latest) release plus an archive of previous versions with their own changelogs.</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="addMod">+ New mod</button>
+    </div>
+    ${db.mods.map((m, i) => `
+      <div class="card">
+        <div class="row">
+          <div class="grow">
+            <div class="row" style="gap:9px">
+              <b>${esc(m.name)}</b>
+              <span class="pill blue">${esc((m.featured || {}).v || "—")}</span>
+              <span class="pill ${m.accent === "purple" ? "purple" : "blue"}">${esc(m.accent)}</span>
+            </div>
+            <div class="muted" style="margin-top:5px">${esc(m.desc)}</div>
+            <div class="faint mono" style="margin-top:5px">id: ${esc(m.id)} · ${(m.versions || []).length} archived version(s) · ${(m.featured || {}).file ? "file ✓" : "no file"} · ${m.icon ? "icon ✓" : "initials"}</div>
+          </div>
+          <button class="btn small" data-act="release" data-i="${i}">Publish release</button>
+          <button class="btn small" data-act="edit" data-i="${i}">Edit</button>
+          <button class="btn small danger" data-act="del" data-i="${i}">Delete</button>
+        </div>
+      </div>`).join("") || `<p class="muted">No mods yet.</p>`}`;
+  $("#addMod", body).addEventListener("click", () => editMod(null));
+  body.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.dataset.i;
+    if (b.dataset.act === "edit") editMod(i);
+    else if (b.dataset.act === "release") publishRelease(i);
+    else deleteMod(i);
+  }));
+}
+
+async function deleteMod(i) {
+  const m = db.mods[i];
+  if (!confirm(`Delete "${m.name}" from the site? (Takes effect on Save.)`)) return;
+  db.mods.splice(i, 1);
+  markDirty();
+  renderTab();
+  try {
+    const files = await listDirOrEmpty("files/mods/" + m.id);
+    if (files.length && confirm(`Also delete ${files.length} uploaded file(s) for "${m.name}" from the repo now?`)) {
+      const n = await deleteItemFiles("mods", m.id);
+      toast("Deleted " + n + " file(s) from the repo.", "ok");
+    }
+  } catch (e) { toast("Could not check uploaded files: " + e.message, "err"); }
+}
+
+function versionFieldsHtml(v, prefix) {
+  v = v || {};
+  return `
+    <div class="grid3">
+      <div><label>Version <span class="hint">e.g. v2.5.0</span></label><input data-f="${prefix}v" value="${esc(v.v || "")}"></div>
+      <div><label>MC range</label><input data-f="${prefix}mc" value="${esc(v.mc || "")}" placeholder="1.21.4 – 1.21.6"></div>
+      <div><label>Date</label><input data-f="${prefix}date" value="${esc(v.date || todayStr())}"></div>
+    </div>
+    <label>Changelog <span class="hint">— one bullet per line</span></label>
+    <textarea data-f="${prefix}notes">${esc((v.notes || []).join("\n"))}</textarea>
+    <label>Required mods <span class="hint">— one per line: Name | ≥ 1.0.0</span></label>
+    <textarea data-f="${prefix}deps">${esc(depsToText(v.deps))}</textarea>`;
+}
+
+function readVersionFields(modal, prefix, base) {
+  const g = (f) => modal.querySelector(`[data-f="${prefix}${f}"]`).value.trim();
+  return {
+    ...base,
+    v: g("v"), mc: g("mc"), date: g("date"),
+    notes: lines(modal.querySelector(`[data-f="${prefix}notes"]`).value),
+    deps: parseDeps(modal.querySelector(`[data-f="${prefix}deps"]`).value)
+  };
+}
+
+function editMod(i) {
+  const isNew = i == null;
+  const m = isNew
+    ? { id: "", name: "", initials: "", accent: "blue", icon: null, desc: "",
+        featured: { v: "", mc: "", loader: "Fabric", date: todayStr(), size: null, file: null, notes: [], deps: [] },
+        versions: [] }
+    : db.mods[i];
+  const f = m.featured = m.featured || {};
+
+  const modal = openModal(`
+    <h2>${isNew ? "New mod" : "Edit — " + esc(m.name)}</h2>
+    <div class="grid3">
+      <div><label>Name</label><input data-f="name" value="${esc(m.name)}"></div>
+      <div><label>Initials <span class="hint">icon text</span></label><input data-f="initials" value="${esc(m.initials)}" maxlength="3"></div>
+      <div><label>Accent</label>
+        <select data-f="accent"><option value="blue" ${m.accent !== "purple" ? "selected" : ""}>blue</option><option value="purple" ${m.accent === "purple" ? "selected" : ""}>purple</option></select></div>
+    </div>
+    <label>Description</label>
+    <textarea data-f="desc" style="min-height:52px">${esc(m.desc)}</textarea>
+    ${iconWidgetHtml(m)}
+    <h3 style="margin:22px 0 0;font-size:15px;color:var(--blue-soft)">Featured (latest) release</h3>
+    <div class="grid2">
+      <div><label>Loader</label><input data-f="loader" value="${esc(f.loader || "Fabric")}"></div><div></div>
+    </div>
+    ${versionFieldsHtml(f, "f_")}
+    ${fileWidgetHtml(f, "Mod file (.jar)")}
+    <p class="faint" style="margin:10px 0 0">Older versions are managed from the mod card — publish a release to archive the current featured one, or edit them in Raw JSON.</p>
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">${isNew ? "Add mod" : "Apply"}</button>
+    </div>`);
+
+  const modId = () => {
+    if (!m.id) {
+      const name = modal.querySelector('[data-f="name"]').value.trim();
+      if (name) m.id = slugify(name);
+    }
+    return m.id || null;
+  };
+  wireFileWidget(modal, "mods", modId, () => f, null);
+  wireIconWidget(modal, "mods", modId, () => m);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const g = (k) => modal.querySelector(`[data-f="${k}"]`).value.trim();
+    if (!g("name")) return toast("Name is required.", "err");
+    m.name = g("name");
+    m.initials = g("initials") || m.name.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2);
+    m.accent = g("accent");
+    m.desc = g("desc");
+    m.id = m.id || slugify(m.name);
+    m.featured = readVersionFields(modal, "f_", { ...f, loader: g("loader") });
+    if (isNew) db.mods.push(m);
+    markDirty();
+    closeModal();
+    renderTab();
+  });
+}
+
+/* "Publish release": current featured moves to the version archive, new one becomes featured. */
+function publishRelease(i) {
+  const m = db.mods[i];
+  const nv = { v: "", mc: (m.featured || {}).mc || "", loader: (m.featured || {}).loader || "Fabric", date: todayStr(), size: null, file: null, notes: [], deps: (m.featured || {}).deps || [] };
+  const modal = openModal(`
+    <h2>Publish release — ${esc(m.name)}</h2>
+    <p class="muted" style="margin:4px 0 0">Current featured (${esc((m.featured || {}).v || "none")}) moves into "Previous versions".</p>
+    <div class="grid2"><div><label>Loader</label><input data-f="loader" value="${esc(nv.loader)}"></div><div></div></div>
+    ${versionFieldsHtml(nv, "n_")}
+    ${fileWidgetHtml(nv, "Mod file (.jar)")}
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted);font-size:13px;margin-top:16px">
+      <input type="checkbox" data-f="post" checked style="width:auto"> Also post to the Updates page
+    </label>
+    <div data-role="postFields">
+      <div class="grid2">
+        <div><label>Update title</label><input data-f="ptitle" value=""></div>
+        <div><label>Date</label><input data-f="pdate" value="${esc(todayStr())}"></div>
+      </div>
+      <label>Update text</label>
+      <textarea data-f="pbody" style="min-height:52px"></textarea>
+    </div>
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">Publish</button>
+    </div>`);
+  wireFileWidget(modal, "mods", () => m.id, () => nv, null);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-f="post"]').addEventListener("change", (e) => {
+    modal.querySelector('[data-role="postFields"]').style.display = e.target.checked ? "" : "none";
+  });
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const rel = readVersionFields(modal, "n_", { ...nv, loader: modal.querySelector('[data-f="loader"]').value.trim() });
+    if (!rel.v) return toast("Version is required.", "err");
+    if (m.featured && m.featured.v) m.versions = [ { ...m.featured }, ...(m.versions || []) ];
+    m.featured = rel;
+    if (modal.querySelector('[data-f="post"]').checked) {
+      db.updates.unshift({
+        id: "u" + Date.now(),
+        tag: rel.v, accent: m.accent === "purple" ? "purple" : "blue",
+        date: modal.querySelector('[data-f="pdate"]').value.trim() || todayStr(),
+        title: modal.querySelector('[data-f="ptitle"]').value.trim() || (m.name + " " + rel.v),
+        body: modal.querySelector('[data-f="pbody"]').value.trim() || (rel.notes || []).join(" · "),
+        link: "downloads", linkText: "Get it on Downloads"
+      });
+    }
+    markDirty();
+    closeModal();
+    renderTab();
+    toast(m.name + " " + rel.v + " staged — hit Save & publish.", "ok");
+  });
+}
+
+/* ================= Modpacks tab ================= */
+function renderModpacks(body) {
+  body.innerHTML = `
+    <div class="row" style="margin-bottom:16px">
+      <span class="muted">Ready-made bundles shown under Downloads.</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="addPack">+ New modpack</button>
+    </div>
+    ${db.modpacks.map((p, i) => `
+      <div class="card"><div class="row">
+        <div class="grow">
+          <div class="row" style="gap:9px"><b>${esc(p.name)}</b><span class="pill blue">${esc(p.version)}</span></div>
+          <div class="muted" style="margin-top:5px">${esc(p.desc)}</div>
+          <div class="faint mono" style="margin-top:5px">id: ${esc(p.id)} · ${p.file ? "file ✓" : "no file"} · ${p.icon ? "icon ✓" : "initials"}</div>
+        </div>
+        <button class="btn small" data-act="edit" data-i="${i}">Edit</button>
+        <button class="btn small danger" data-act="del" data-i="${i}">Delete</button>
+      </div></div>`).join("") || `<p class="muted">No modpacks yet.</p>`}`;
+  $("#addPack", body).addEventListener("click", () => editPack(null));
+  body.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", async () => {
+    const i = +b.dataset.i;
+    if (b.dataset.act === "edit") return editPack(i);
+    const p = db.modpacks[i];
+    if (!confirm(`Delete "${p.name}"? (Takes effect on Save.)`)) return;
+    db.modpacks.splice(i, 1);
+    markDirty(); renderTab();
+    const files = await listDirOrEmpty("files/packs/" + p.id).catch(() => []);
+    if (files.length && confirm(`Also delete ${files.length} uploaded file(s) for "${p.name}" from the repo now?`)) {
+      await deleteItemFiles("packs", p.id);
+      toast("Files deleted.", "ok");
+    }
+  }));
+}
+
+function editPack(i) {
+  const isNew = i == null;
+  const p = isNew
+    ? { id: "", name: "", initials: "", accent: "blue", icon: null, desc: "", version: "", mc: "", loader: "Fabric", date: todayStr(), size: null, file: null, includes: [] }
+    : db.modpacks[i];
+  const modal = openModal(`
+    <h2>${isNew ? "New modpack" : "Edit — " + esc(p.name)}</h2>
+    <div class="grid3">
+      <div><label>Name</label><input data-f="name" value="${esc(p.name)}"></div>
+      <div><label>Initials</label><input data-f="initials" value="${esc(p.initials)}" maxlength="3"></div>
+      <div><label>Accent</label>
+        <select data-f="accent"><option value="blue" ${p.accent !== "purple" ? "selected" : ""}>blue</option><option value="purple" ${p.accent === "purple" ? "selected" : ""}>purple</option></select></div>
+    </div>
+    <label>Description</label>
+    <textarea data-f="desc" style="min-height:52px">${esc(p.desc)}</textarea>
+    <div class="grid3">
+      <div><label>Version</label><input data-f="version" value="${esc(p.version)}"></div>
+      <div><label>MC range</label><input data-f="mc" value="${esc(p.mc)}"></div>
+      <div><label>Date</label><input data-f="date" value="${esc(p.date || todayStr())}"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Loader</label><input data-f="loader" value="${esc(p.loader || "Fabric")}"></div><div></div>
+    </div>
+    <label>Includes <span class="hint">— one per line</span></label>
+    <textarea data-f="includes">${esc((p.includes || []).join("\n"))}</textarea>
+    ${iconWidgetHtml(p)}
+    ${fileWidgetHtml(p, "Pack file (.zip / .mrpack)")}
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">${isNew ? "Add modpack" : "Apply"}</button>
+    </div>`);
+  const packId = () => {
+    if (!p.id) {
+      const name = modal.querySelector('[data-f="name"]').value.trim();
+      if (name) p.id = slugify(name);
+    }
+    return p.id || null;
+  };
+  wireFileWidget(modal, "packs", packId, () => p, null);
+  wireIconWidget(modal, "packs", packId, () => p);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const g = (k) => modal.querySelector(`[data-f="${k}"]`).value.trim();
+    if (!g("name")) return toast("Name is required.", "err");
+    Object.assign(p, {
+      name: g("name"),
+      initials: g("initials") || g("name").split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2),
+      accent: g("accent"), desc: g("desc"), version: g("version"), mc: g("mc"),
+      loader: g("loader"), date: g("date"),
+      includes: lines(modal.querySelector('[data-f="includes"]').value)
+    });
+    p.id = p.id || slugify(p.name);
+    if (isNew) db.modpacks.push(p);
+    markDirty(); closeModal(); renderTab();
+  });
+}
+
+/* ================= Resource packs tab ================= */
+function renderResourcepacks(body) {
+  body.innerHTML = `
+    <div class="row" style="margin-bottom:16px">
+      <span class="muted">Texture / sound packs shown under Downloads → Resource Packs.</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="addRp">+ New resource pack</button>
+    </div>
+    ${db.resourcepacks.map((r, i) => `
+      <div class="card"><div class="row">
+        <div class="grow">
+          <div class="row" style="gap:9px">
+            <b>${esc(r.name)}</b>
+            <span class="pill blue">${esc(r.version || "—")}</span>
+            ${r.resolution ? `<span class="pill purple">${esc(r.resolution)}</span>` : ""}
+          </div>
+          <div class="muted" style="margin-top:5px">${esc(r.desc)}</div>
+          <div class="faint mono" style="margin-top:5px">id: ${esc(r.id)} · ${r.file ? "file ✓" : "no file"} · ${r.icon ? "icon ✓" : "initials"}</div>
+        </div>
+        <button class="btn small" data-act="edit" data-i="${i}">Edit</button>
+        <button class="btn small danger" data-act="del" data-i="${i}">Delete</button>
+      </div></div>`).join("") || `<p class="muted">No resource packs yet.</p>`}`;
+  $("#addRp", body).addEventListener("click", () => editResourcepack(null));
+  body.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", async () => {
+    const i = +b.dataset.i;
+    if (b.dataset.act === "edit") return editResourcepack(i);
+    const r = db.resourcepacks[i];
+    if (!confirm(`Delete "${r.name}"? (Takes effect on Save.)`)) return;
+    db.resourcepacks.splice(i, 1);
+    markDirty(); renderTab();
+    const files = await listDirOrEmpty("files/resourcepacks/" + r.id).catch(() => []);
+    if (files.length && confirm(`Also delete ${files.length} uploaded file(s) for "${r.name}" from the repo now?`)) {
+      await deleteItemFiles("resourcepacks", r.id);
+      toast("Files deleted.", "ok");
+    }
+  }));
+}
+
+function editResourcepack(i) {
+  const isNew = i == null;
+  const r = isNew
+    ? { id: "", name: "", initials: "", accent: "blue", icon: null, desc: "", version: "", mc: "", resolution: "", date: todayStr(), size: null, file: null }
+    : db.resourcepacks[i];
+  const modal = openModal(`
+    <h2>${isNew ? "New resource pack" : "Edit — " + esc(r.name)}</h2>
+    <div class="grid3">
+      <div><label>Name</label><input data-f="name" value="${esc(r.name)}"></div>
+      <div><label>Initials <span class="hint">icon text</span></label><input data-f="initials" value="${esc(r.initials)}" maxlength="3"></div>
+      <div><label>Accent</label>
+        <select data-f="accent"><option value="blue" ${r.accent !== "purple" ? "selected" : ""}>blue</option><option value="purple" ${r.accent === "purple" ? "selected" : ""}>purple</option></select></div>
+    </div>
+    <label>Description</label>
+    <textarea data-f="desc" style="min-height:52px">${esc(r.desc)}</textarea>
+    <div class="grid3">
+      <div><label>Version</label><input data-f="version" value="${esc(r.version)}"></div>
+      <div><label>MC range</label><input data-f="mc" value="${esc(r.mc)}" placeholder="1.21.4 – 1.21.6"></div>
+      <div><label>Resolution <span class="hint">e.g. 16x</span></label><input data-f="resolution" value="${esc(r.resolution || "")}"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Date</label><input data-f="date" value="${esc(r.date || todayStr())}"></div><div></div>
+    </div>
+    ${iconWidgetHtml(r)}
+    ${fileWidgetHtml(r, "Pack file (.zip)")}
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">${isNew ? "Add resource pack" : "Apply"}</button>
+    </div>`);
+  const rpId = () => {
+    if (!r.id) {
+      const name = modal.querySelector('[data-f="name"]').value.trim();
+      if (name) r.id = slugify(name);
+    }
+    return r.id || null;
+  };
+  wireFileWidget(modal, "resourcepacks", rpId, () => r, null);
+  wireIconWidget(modal, "resourcepacks", rpId, () => r);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const g = (k) => modal.querySelector(`[data-f="${k}"]`).value.trim();
+    if (!g("name")) return toast("Name is required.", "err");
+    Object.assign(r, {
+      name: g("name"),
+      initials: g("initials") || g("name").split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 2),
+      accent: g("accent"), desc: g("desc"), version: g("version"), mc: g("mc"),
+      resolution: g("resolution"), date: g("date")
+    });
+    r.id = r.id || slugify(r.name);
+    if (isNew) db.resourcepacks.push(r);
+    markDirty(); closeModal(); renderTab();
+  });
+}
+
+/* ================= WIPs tab ================= */
+function renderWips(body) {
+  body.innerHTML = `
+    <div class="row" style="margin-bottom:16px">
+      <span class="muted">Experimental projects on the WIPs page. A build file adds a "Try preview" button.</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="addWip">+ New WIP</button>
+    </div>
+    ${db.wips.map((w, i) => `
+      <div class="card"><div class="row">
+        <div class="grow">
+          <div class="row" style="gap:9px"><b>${esc(w.name)}</b><span class="pill purple">${esc(w.stage)} · ${esc(w.percent)}%</span></div>
+          <div class="muted" style="margin-top:5px">${esc(w.note)}</div>
+          <div class="faint mono" style="margin-top:5px">id: ${esc(w.id)} · ${w.file ? "build ✓" : "no build"}</div>
+        </div>
+        <button class="btn small" data-act="edit" data-i="${i}">Edit</button>
+        <button class="btn small danger" data-act="del" data-i="${i}">Delete</button>
+      </div></div>`).join("") || `<p class="muted">No WIPs yet.</p>`}`;
+  $("#addWip", body).addEventListener("click", () => editWip(null));
+  body.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", async () => {
+    const i = +b.dataset.i;
+    if (b.dataset.act === "edit") return editWip(i);
+    const w = db.wips[i];
+    if (!confirm(`Delete "${w.name}"? (Takes effect on Save.)`)) return;
+    db.wips.splice(i, 1);
+    markDirty(); renderTab();
+    const files = await listDirOrEmpty("files/wips/" + w.id).catch(() => []);
+    if (files.length && confirm(`Also delete ${files.length} uploaded file(s) for "${w.name}" from the repo now?`)) {
+      await deleteItemFiles("wips", w.id);
+      toast("Files deleted.", "ok");
+    }
+  }));
+}
+
+function editWip(i) {
+  const isNew = i == null;
+  const w = isNew ? { id: "", name: "", tagline: "", stage: "early", percent: 10, note: "", file: null, size: null } : db.wips[i];
+  const modal = openModal(`
+    <h2>${isNew ? "New WIP" : "Edit — " + esc(w.name)}</h2>
+    <div class="grid2">
+      <div><label>Name</label><input data-f="name" value="${esc(w.name)}"></div>
+      <div><label>Tagline <span class="hint">short subtitle</span></label><input data-f="tagline" value="${esc(w.tagline)}"></div>
+    </div>
+    <div class="grid2">
+      <div><label>Stage label <span class="hint">e.g. preview 4, design stage</span></label><input data-f="stage" value="${esc(w.stage)}"></div>
+      <div><label>Progress % <span class="hint">0–100</span></label><input data-f="percent" type="number" min="0" max="100" value="${esc(w.percent)}"></div>
+    </div>
+    <label>Status note</label>
+    <textarea data-f="note" style="min-height:52px">${esc(w.note)}</textarea>
+    ${fileWidgetHtml(w, "Preview build (optional)")}
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">${isNew ? "Add WIP" : "Apply"}</button>
+    </div>`);
+  wireFileWidget(modal, "wips", () => {
+    if (!w.id) {
+      const name = modal.querySelector('[data-f="name"]').value.trim();
+      if (name) w.id = slugify(name);
+    }
+    return w.id || null;
+  }, () => w, null);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const g = (k) => modal.querySelector(`[data-f="${k}"]`).value.trim();
+    if (!g("name")) return toast("Name is required.", "err");
+    Object.assign(w, { name: g("name"), tagline: g("tagline"), stage: g("stage"), percent: Math.max(0, Math.min(100, +g("percent") || 0)), note: g("note") });
+    w.id = w.id || slugify(w.name);
+    if (isNew) db.wips.push(w);
+    markDirty(); closeModal(); renderTab();
+  });
+}
+
+/* ================= Updates tab ================= */
+function renderUpdates(body) {
+  body.innerHTML = `
+    <div class="row" style="margin-bottom:16px">
+      <span class="muted">News posts on the Updates page, newest first.</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="addUpd">+ New post</button>
+    </div>
+    ${db.updates.map((u, i) => `
+      <div class="card"><div class="row">
+        <div class="grow">
+          <div class="row" style="gap:9px"><span class="pill ${u.accent === "purple" ? "purple" : "blue"}">${esc(u.tag)}</span><b>${esc(u.title)}</b><span class="faint">${esc(u.date)}</span></div>
+          <div class="muted" style="margin-top:5px">${esc(u.body)}</div>
+        </div>
+        <button class="btn small" data-act="edit" data-i="${i}">Edit</button>
+        <button class="btn small danger" data-act="del" data-i="${i}">Delete</button>
+      </div></div>`).join("") || `<p class="muted">No posts yet.</p>`}`;
+  $("#addUpd", body).addEventListener("click", () => editUpdate(null));
+  body.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.dataset.i;
+    if (b.dataset.act === "edit") return editUpdate(i);
+    if (!confirm("Delete this post? (Takes effect on Save.)")) return;
+    db.updates.splice(i, 1);
+    markDirty(); renderTab();
+  }));
+}
+
+function editUpdate(i) {
+  const isNew = i == null;
+  const u = isNew ? { id: "u" + Date.now(), tag: "", accent: "blue", date: todayStr(), title: "", body: "", link: "downloads", linkText: "Get it on Downloads" } : db.updates[i];
+  const modal = openModal(`
+    <h2>${isNew ? "New post" : "Edit post"}</h2>
+    <div class="grid3">
+      <div><label>Tag <span class="hint">e.g. v2.5.0 or WIP</span></label><input data-f="tag" value="${esc(u.tag)}"></div>
+      <div><label>Tag colour</label>
+        <select data-f="accent"><option value="blue" ${u.accent !== "purple" ? "selected" : ""}>blue</option><option value="purple" ${u.accent === "purple" ? "selected" : ""}>purple</option></select></div>
+      <div><label>Date</label><input data-f="date" value="${esc(u.date)}"></div>
+    </div>
+    <label>Title</label><input data-f="title" value="${esc(u.title)}">
+    <label>Body</label><textarea data-f="body">${esc(u.body)}</textarea>
+    <div class="grid2">
+      <div><label>Link to</label>
+        <select data-f="link">
+          <option value="" ${!u.link ? "selected" : ""}>no link</option>
+          <option value="downloads" ${u.link === "downloads" ? "selected" : ""}>Downloads page</option>
+          <option value="wips" ${u.link === "wips" ? "selected" : ""}>WIPs page</option>
+          <option value="bugs" ${u.link === "bugs" ? "selected" : ""}>Bug Tracker</option>
+        </select></div>
+      <div><label>Link text</label><input data-f="linkText" value="${esc(u.linkText || "")}"></div>
+    </div>
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">${isNew ? "Add post" : "Apply"}</button>
+    </div>`);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const g = (k) => modal.querySelector(`[data-f="${k}"]`).value.trim();
+    if (!g("title")) return toast("Title is required.", "err");
+    Object.assign(u, { tag: g("tag") || "NEWS", accent: g("accent"), date: g("date"), title: g("title"), body: g("body"), link: g("link") || null, linkText: g("linkText") });
+    if (isNew) db.updates.unshift(u);
+    markDirty(); closeModal(); renderTab();
+  });
+}
+
+/* ================= Bugs tab ================= */
+function renderBugs(body) {
+  body.innerHTML = `
+    <div class="row" style="margin-bottom:16px">
+      <span class="muted">Entries on the public bug tracker.</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="addBug">+ New bug</button>
+    </div>
+    ${db.bugs.map((b, i) => `
+      <div class="card"><div class="row">
+        <span class="mono faint">${esc(b.id)}</span>
+        <div class="grow">
+          <b style="font-weight:500">${esc(b.title)}</b>
+          <span class="faint" style="margin-left:8px">${esc(b.meta)}</span>
+        </div>
+        <span class="pill ${b.status === "FIXED" ? "green" : b.status === "OPEN" ? "amber" : "blue"}">${esc(b.status)}</span>
+        <button class="btn small" data-act="edit" data-i="${i}">Edit</button>
+        <button class="btn small danger" data-act="del" data-i="${i}">Delete</button>
+      </div></div>`).join("") || `<p class="muted">No bugs yet.</p>`}`;
+  $("#addBug", body).addEventListener("click", () => editBug(null));
+  body.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.dataset.i;
+    if (b.dataset.act === "edit") return editBug(i);
+    if (!confirm("Delete this bug entry? (Takes effect on Save.)")) return;
+    db.bugs.splice(i, 1);
+    markDirty(); renderTab();
+  }));
+}
+
+function nextBugId() {
+  const n = db.bugs.reduce((mx, b) => Math.max(mx, parseInt(String(b.id).replace(/\D/g, ""), 10) || 0), 0);
+  return "#" + (n + 1);
+}
+
+function editBug(i) {
+  const isNew = i == null;
+  const b = isNew ? { id: nextBugId(), title: "", status: "OPEN", meta: "" } : db.bugs[i];
+  const modal = openModal(`
+    <h2>${isNew ? "New bug" : "Edit " + esc(b.id)}</h2>
+    <div class="grid3">
+      <div><label>ID</label><input data-f="id" value="${esc(b.id)}"></div>
+      <div><label>Status</label>
+        <select data-f="status">
+          ${["OPEN", "IN PROGRESS", "FIXED"].map(s => `<option ${b.status === s ? "selected" : ""}>${s}</option>`).join("")}
+        </select></div>
+      <div><label>Meta <span class="hint">e.g. v2.4.1 · 2 days ago</span></label><input data-f="meta" value="${esc(b.meta)}"></div>
+    </div>
+    <label>Title</label><input data-f="title" value="${esc(b.title)}">
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">${isNew ? "Add bug" : "Apply"}</button>
+    </div>`);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const g = (k) => modal.querySelector(`[data-f="${k}"]`).value.trim();
+    if (!g("title")) return toast("Title is required.", "err");
+    Object.assign(b, { id: g("id"), title: g("title"), status: modal.querySelector('[data-f="status"]').value, meta: g("meta") });
+    if (isNew) db.bugs.unshift(b);
+    markDirty(); closeModal(); renderTab();
+  });
+}
+
+/* ================= Source tab ================= */
+function renderSource(body) {
+  body.innerHTML = `
+    <div class="row" style="margin-bottom:16px">
+      <span class="muted">Repository cards on the Source page. Entries without a URL show "No link yet".</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="addSrc">+ New source link</button>
+    </div>
+    ${db.source.map((s, i) => `
+      <div class="card"><div class="row">
+        <div class="grow">
+          <div class="row" style="gap:9px"><b class="mono" style="font-size:13.5px">${esc(s.name)}</b><span class="pill ${s.url ? "green" : "amber"}">${s.url ? "linked" : "no link"}</span></div>
+          <div class="muted" style="margin-top:5px">${esc(s.desc)}</div>
+          <div class="faint mono" style="margin-top:5px">${esc(s.meta || "")}${s.url ? " · " + esc(s.url) : ""}</div>
+        </div>
+        <button class="btn small" data-act="edit" data-i="${i}">Edit</button>
+        <button class="btn small danger" data-act="del" data-i="${i}">Delete</button>
+      </div></div>`).join("") || `<p class="muted">No source links yet.</p>`}`;
+  $("#addSrc", body).addEventListener("click", () => editSource(null));
+  body.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
+    const i = +b.dataset.i;
+    if (b.dataset.act === "edit") return editSource(i);
+    if (!confirm(`Delete "${db.source[i].name}"? (Takes effect on Save.)`)) return;
+    db.source.splice(i, 1);
+    markDirty(); renderTab();
+  }));
+}
+
+function editSource(i) {
+  const isNew = i == null;
+  const s = isNew ? { id: "", name: "", desc: "", meta: "Java · GPL-3.0", url: null } : db.source[i];
+  const modal = openModal(`
+    <h2>${isNew ? "New source link" : "Edit — " + esc(s.name)}</h2>
+    <div class="grid2">
+      <div><label>Repo name <span class="hint">e.g. firestorm-core</span></label><input data-f="name" value="${esc(s.name)}"></div>
+      <div><label>Meta <span class="hint">e.g. Java · GPL-3.0</span></label><input data-f="meta" value="${esc(s.meta || "")}"></div>
+    </div>
+    <label>Description</label>
+    <textarea data-f="desc" style="min-height:52px">${esc(s.desc)}</textarea>
+    <label>Repository URL <span class="hint">— leave empty to show "No link yet"</span></label>
+    <input data-f="url" value="${esc(s.url || "")}" placeholder="https://github.com/…">
+    <div class="row" style="margin-top:22px">
+      <span style="margin-left:auto"></span>
+      <button class="btn" data-role="cancel">Cancel</button>
+      <button class="btn primary" data-role="ok">${isNew ? "Add link" : "Apply"}</button>
+    </div>`);
+  modal.querySelector('[data-role="cancel"]').addEventListener("click", closeModal);
+  modal.querySelector('[data-role="ok"]').addEventListener("click", () => {
+    const g = (k) => modal.querySelector(`[data-f="${k}"]`).value.trim();
+    if (!g("name")) return toast("Repo name is required.", "err");
+    const url = g("url");
+    if (url && !/^https?:\/\//.test(url)) return toast("URL must start with http(s)://", "err");
+    Object.assign(s, { name: g("name"), desc: g("desc"), meta: g("meta"), url: url || null });
+    s.id = s.id || slugify(s.name);
+    if (isNew) db.source.push(s);
+    markDirty(); closeModal(); renderTab();
+  });
+}
+
+/* ================= Site tab ================= */
+function renderSite(body) {
+  const s = db.site = { ...SITE_DEFAULTS, ...(db.site || {}) };
+  body.innerHTML = `
+    <p class="muted" style="margin-top:0">Site-wide text and styling. Changes apply everywhere on <b>Save &amp; publish</b>.</p>
+    <div class="card">
+      <h3 style="margin:4px 0 0;font-size:15px;color:var(--blue-soft)">Text</h3>
+      <div class="grid2">
+        <div><label>Site name <span class="hint">— topbar &amp; footer</span></label><input data-s="name" value="${esc(s.name)}"></div>
+        <div><label>Home title <span class="hint">— big heading</span></label><input data-s="title" value="${esc(s.title)}"></div>
+      </div>
+      <label>Home tagline</label>
+      <textarea data-s="tagline" style="min-height:52px">${esc(s.tagline)}</textarea>
+    </div>
+    <div class="card">
+      <h3 style="margin:4px 0 0;font-size:15px;color:var(--blue-soft)">Appearance</h3>
+      <p class="muted" style="margin:6px 0 2px">What a first-time visitor sees. The site has its own theme picker in the topbar — once someone chooses there, their browser remembers it and these no longer apply to them.</p>
+      <div class="grid2">
+        <div><label>Colour mode</label>
+          <select data-s="defaultMode">
+            <option value="dark" ${s.defaultMode === "dark" ? "selected" : ""}>Dark</option>
+            <option value="light" ${s.defaultMode === "light" ? "selected" : ""}>Light</option>
+            <option value="system" ${s.defaultMode === "system" ? "selected" : ""}>Follow the visitor's device</option>
+          </select></div>
+        <div><label>Home layout</label>
+          <select data-s="homeLayout">
+            <option value="hero" ${s.homeLayout === "dashboard" ? "" : "selected"}>Centred — logo, tagline, link cards</option>
+            <option value="dashboard" ${s.homeLayout === "dashboard" ? "selected" : ""}>Dashboard — latest release + recent updates</option>
+          </select></div>
+      </div>
+      <label style="margin-top:16px">Accent colour</label>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        ${ACCENTS.map(([k, hex]) => `
+          <span data-accent="${k}" title="${k[0].toUpperCase() + k.slice(1)}" style="width:30px;height:30px;border-radius:99px;cursor:pointer;background:${hex};box-shadow:${s.defaultAccent === k ? `0 0 0 2px var(--card), 0 0 0 4px ${hex}` : "none"}"></span>`).join("")}
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin:4px 0 0;font-size:15px;color:var(--blue-soft)">Downloads tabs</h3>
+      <p class="muted" style="margin:6px 0 2px">Untick a section to hide its tab on the public Downloads page. The content stays here, it just isn't shown.</p>
+      ${[["showMods", "Mods"], ["showModpacks", "Modpacks"], ["showResourcePacks", "Resource Packs"]].map(([k, l]) => `
+        <label style="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--text);font-size:13.5px;margin:12px 0 0">
+          <input type="checkbox" data-sb="${k}" ${s[k] !== false ? "checked" : ""} style="width:auto"> ${l}
+        </label>`).join("")}
+      <p class="faint" id="dlTabWarn" style="margin:14px 0 0"></p>
+    </div>
+    <div class="row">
+      <span class="faint">These only cover the basics — anything deeper still means editing the site bundle.</span>
+      <span style="margin-left:auto"></span>
+      <button class="btn danger" id="siteReset">Reset to defaults</button>
+    </div>`;
+
+  body.querySelectorAll("[data-s]").forEach(el => {
+    const evt = el.tagName === "SELECT" ? "change" : "input";
+    el.addEventListener(evt, () => {
+      db.site[el.dataset.s] = el.value.trim();
+      markDirty();
+    });
+  });
+  const dlWarn = () => {
+    const on = ["showMods", "showModpacks", "showResourcePacks"].filter(k => db.site[k] !== false).length;
+    const el = $("#dlTabWarn", body);
+    el.textContent = on ? "" : "All sections are hidden — the Downloads page will say there's nothing published.";
+    el.className = on ? "faint" : "status err";
+  };
+  body.querySelectorAll("[data-sb]").forEach(box => {
+    box.addEventListener("change", () => {
+      db.site[box.dataset.sb] = box.checked;
+      dlWarn();
+      markDirty();
+    });
+  });
+  dlWarn();
+  body.querySelectorAll("[data-accent]").forEach(sw => {
+    sw.addEventListener("click", () => {
+      db.site.defaultAccent = sw.dataset.accent;
+      markDirty(); renderTab();
+    });
+  });
+  $("#siteReset", body).addEventListener("click", () => {
+    if (!confirm("Reset all site settings to their defaults? (Takes effect on Save.)")) return;
+    db.site = { ...SITE_DEFAULTS };
+    markDirty(); renderTab();
+  });
+}
+
+/* ================= Raw JSON tab ================= */
+function renderRawJson(body) {
+  body.innerHTML = `
+    <p class="muted" style="margin-top:0">Direct access to <code>${DATA_PATH}</code> for anything the forms don't cover (reordering, editing archived versions, etc.).</p>
+    <textarea id="rawJson" class="mono" style="min-height:420px;font-size:12px;line-height:1.5">${esc(JSON.stringify(db, null, 2))}</textarea>
+    <div class="row" style="margin-top:12px">
+      <span class="status" id="rawStatus"></span>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="applyRaw">Apply to editor</button>
+    </div>`;
+  $("#applyRaw", body).addEventListener("click", () => {
+    try {
+      const parsed = JSON.parse($("#rawJson").value);
+      ["mods", "modpacks", "resourcepacks", "wips", "updates", "bugs", "source"].forEach(k => { if (!Array.isArray(parsed[k])) parsed[k] = []; });
+      parsed.site = { ...SITE_DEFAULTS, ...(parsed.site || {}) };
+      db = parsed;
+      markDirty();
+      $("#rawStatus").textContent = "Applied — hit Save & publish to commit.";
+      $("#rawStatus").className = "status ok";
+    } catch (e) {
+      $("#rawStatus").textContent = "Invalid JSON: " + e.message;
+      $("#rawStatus").className = "status err";
+    }
+  });
+}
+
+/* ================= Boot ================= */
+(async function boot() {
+  const saved = localStorage.getItem("fmd_admin_token");
+  if (saved) {
+    token = saved;
+    try {
+      await gh("/repos/" + OWNER + "/" + REPO);
+      await loadData();
+      renderApp();
+      return;
+    } catch (e) {
+      token = null;
+      localStorage.removeItem("fmd_admin_token");
+      renderLogin("Saved token no longer works (" + (e.message || e) + "). Sign in again.");
+      return;
+    }
+  }
+  renderLogin();
+})();
+</script>
+</body>
+</html>

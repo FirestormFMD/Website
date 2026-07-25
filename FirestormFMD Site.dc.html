@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f1f3f5; --surface:#f8f9fa; --surface-2:#e9ecef;
+  --line:#dee2e6; --line-2:#ced4da;
+  --tx:#212529; --tx-2:#343a40; --tx-3:#495057;
+  --ac-base:#228be6; --ac-fill:#1971c2; --ac-on:#f8f9fa; --ac-text:#1971c2;
+  --ok:#2b8a3e; --warn:#d9480f;
+  --sh:0 1px 2px rgba(33,37,41,0.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Instrument Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--ac-text);text-decoration:none}
+a:hover{color:var(--ac-fill)}
+::selection{background:var(--ac-base);color:var(--ac-on)}
+@keyframes fmdIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fmdPop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+</style></helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--tx)">
+
+  <header style="position:sticky;top:0;z-index:40;background:color-mix(in srgb, var(--bg) 86%, transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)">
+    <div style="max-width:1040px;margin:0 auto;padding:0 clamp(16px,4vw,32px);height:60px;display:flex;align-items:center;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:none" onClick="{{ navHome }}">
+        <img src="assets/fmd-logo.png" alt="" style="width:24px;height:24px;border-radius:6px;display:block">
+        <span style="font-weight:600;font-size:15px;letter-spacing:-0.01em">{{ siteName }}</span>
+      </div>
+
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+      <nav style="display:flex;align-items:center;gap:2px;margin-left:18px">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="5">
+          <span onClick="{{ item.click }}" style="cursor:pointer;font-size:13.5px;padding:7px 11px;border-radius:8px;color:{{ item.color }};font-weight:{{ item.weight }};background:{{ item.bg }}" style-hover="color:var(--tx)">{{ item.label }}</span>
+        </sc-for>
+      </nav>
+      </sc-if>
+
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <a href="https://modrinth.com/user/FirestormFMD" target="_blank" style="font-size:13.5px;color:var(--tx-2);padding:7px 11px;border-radius:8px" style-hover="color:var(--tx);background:color-mix(in srgb, var(--tx) 6%, transparent)">Modrinth ↗</a>
+        </sc-if>
+
+        <div data-settings-scope="1" style="position:relative">
+          <span onClick="{{ toggleSettings }}" title="Settings" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:{{ gearBg }};color:var(--tx-2);cursor:pointer;font-size:15px;line-height:1" style-hover="color:var(--tx);border-color:var(--line-2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.1 14.6a1.5 1.5 0 0 0 .3 1.65l.06.06a1.8 1.8 0 1 1-2.55 2.55l-.06-.06a1.5 1.5 0 0 0-1.65-.3 1.5 1.5 0 0 0-.9 1.37V21a1.8 1.8 0 0 1-3.6 0v-.1a1.5 1.5 0 0 0-.98-1.37 1.5 1.5 0 0 0-1.65.3l-.06.06A1.8 1.8 0 1 1 4.46 17.3l.06-.06a1.5 1.5 0 0 0 .3-1.65 1.5 1.5 0 0 0-1.37-.9H3a1.8 1.8 0 0 1 0-3.6h.1a1.5 1.5 0 0 0 1.37-.98 1.5 1.5 0 0 0-.3-1.65l-.06-.06A1.8 1.8 0 1 1 6.7 4.46l.06.06a1.5 1.5 0 0 0 1.65.3H8.5a1.5 1.5 0 0 0 .9-1.37V3a1.8 1.8 0 0 1 3.6 0v.1a1.5 1.5 0 0 0 .9 1.37 1.5 1.5 0 0 0 1.65-.3l.06-.06a1.8 1.8 0 1 1 2.55 2.55l-.06.06a1.5 1.5 0 0 0-.3 1.65v.08a1.5 1.5 0 0 0 1.37.9H21a1.8 1.8 0 0 1 0 3.6h-.1a1.5 1.5 0 0 0-1.37.9z"></path></svg>
+          </span>
+
+          <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:44px;right:0;width:270px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px color-mix(in srgb, var(--tx) 14%, transparent);padding:16px;z-index:50;animation:fmdPop .16s cubic-bezier(.2,.8,.3,1) both">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tx-3)">Appearance</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:9px;padding:3px;background:var(--surface-2);border-radius:10px">
+              <sc-for list="{{ modeOptions }}" as="m" hint-placeholder-count="3">
+                <span onClick="{{ m.click }}" style="text-align:center;font-size:12.5px;padding:7px 0;border-radius:7px;cursor:pointer;color:{{ m.color }};background:{{ m.bg }};font-weight:{{ m.weight }};box-shadow:{{ m.sh }}">{{ m.label }}</span>
+              </sc-for>
+            </div>
+
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tx-3);margin-top:18px">Accent</div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px">
+              <sc-for list="{{ accentOptions }}" as="a" hint-placeholder-count="12">
+                <span onClick="{{ a.click }}" title="{{ a.label }}" style="width:100%;aspect-ratio:1;border-radius:99px;cursor:pointer;background:{{ a.swatch }};box-shadow:{{ a.ring }}"></span>
+              </sc-for>
+            </div>
+            <div style="font-size:12px;color:var(--tx-3);margin-top:11px">{{ accentLabel }}</div>
+
+            <div style="height:1px;background:var(--line);margin:16px -16px 0"></div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tx-3);margin-top:16px">Home layout · preview</div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:9px;padding:3px;background:var(--surface-2);border-radius:10px">
+              <sc-for list="{{ layoutOptions }}" as="l" hint-placeholder-count="2">
+                <span onClick="{{ l.click }}" style="text-align:center;font-size:12.5px;padding:7px 0;border-radius:7px;cursor:pointer;color:{{ l.color }};background:{{ l.bg }};font-weight:{{ l.weight }};box-shadow:{{ l.sh }}">{{ l.label }}</span>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+        <span onClick="{{ toggleNav }}" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid var(--line);color:var(--tx-2);cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+        </span>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{ navOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="border-top:1px solid var(--line);padding:8px clamp(16px,4vw,32px) 14px;display:flex;flex-direction:column;gap:2px;background:var(--bg)">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="5">
+        <span onClick="{{ item.click }}" style="cursor:pointer;font-size:15px;padding:11px 12px;border-radius:9px;color:{{ item.color }};font-weight:{{ item.weight }};background:{{ item.bg }}">{{ item.label }}</span>
+      </sc-for>
+      <a href="https://modrinth.com/user/FirestormFMD" target="_blank" style="font-size:15px;padding:11px 12px;border-radius:9px;color:var(--tx-2)">Modrinth ↗</a>
+    </div>
+    </sc-if>
+  </header>
+
+  <!-- ============ HOME ============ -->
+  <sc-if value="{{ onHome }}" hint-placeholder-val="{{ true }}">
+  <main data-screen-label="Home" style="flex:1;width:100%;max-width:1040px;margin:0 auto;padding:clamp(40px,7vw,80px) clamp(16px,4vw,32px) 64px">
+
+    <!-- Variant A — centred index -->
+    <sc-if value="{{ homeHero }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;animation:fmdIn .5s ease both">
+        <img src="assets/fmd-logo.png" alt="" style="width:56px;height:56px;border-radius:14px;display:block">
+        <h1 style="margin:0;font-size:clamp(30px,6vw,44px);font-weight:700;letter-spacing:-0.03em;line-height:1.05">{{ siteTitle }}</h1>
+        <p style="margin:0;font-size:clamp(15px,2.2vw,17px);color:var(--tx-2);max-width:44ch;line-height:1.6;text-wrap:pretty">{{ siteTagline }}</p>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:6px">
+          <span onClick="{{ navDownloads }}" style="background:var(--ac-fill);color:var(--ac-on);font-weight:600;font-size:14px;padding:11px 20px;border-radius:10px;cursor:pointer" style-hover="filter:brightness(1.08)">Browse downloads</span>
+          <span onClick="{{ navUpdates }}" style="border:1px solid var(--line-2);color:var(--tx);font-size:14px;padding:11px 20px;border-radius:10px;cursor:pointer;background:var(--surface)" style-hover="border-color:var(--tx-3)">What's new</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:clamp(40px,6vw,64px)">
+        <sc-for list="{{ homeCards }}" as="c" hint-placeholder-count="4">
+          <div onClick="{{ c.click }}" style="background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;cursor:pointer;box-shadow:var(--sh);display:flex;flex-direction:column;gap:7px" style-hover="border-color:var(--ac-base);transform:translateY(-2px)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:15px;font-weight:600">{{ c.title }}</span>
+              <sc-if value="{{ c.hasBadge }}"><span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 14%, transparent);border-radius:5px;padding:2px 6px">{{ c.badge }}</span></sc-if>
+              <span style="margin-left:auto;color:var(--tx-3);font-size:15px">→</span>
+            </div>
+            <div style="font-size:13px;color:var(--tx-2);line-height:1.55">{{ c.desc }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- Variant B — left-aligned dashboard -->
+    <sc-if value="{{ homeDash }}" hint-placeholder-val="{{ false }}">
+    <div style="animation:fmdIn .5s ease both">
+      <div style="display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap">
+        <img src="assets/fmd-logo.png" alt="" style="width:52px;height:52px;border-radius:13px;display:block;flex:none">
+        <div style="flex:1;min-width:240px">
+          <h1 style="margin:0;font-size:clamp(28px,5vw,38px);font-weight:700;letter-spacing:-0.03em;line-height:1.08">{{ siteTitle }}</h1>
+          <p style="margin:9px 0 0;font-size:15.5px;color:var(--tx-2);max-width:56ch;line-height:1.6;text-wrap:pretty">{{ siteTagline }}</p>
+        </div>
+        <span onClick="{{ navDownloads }}" style="background:var(--ac-fill);color:var(--ac-on);font-weight:600;font-size:14px;padding:11px 20px;border-radius:10px;cursor:pointer;white-space:nowrap" style-hover="filter:brightness(1.08)">Browse downloads</span>
+      </div>
+
+      <sc-if value="{{ hasLatest }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:clamp(32px,5vw,48px);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);overflow:hidden">
+        <div style="padding:20px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tx-3)">Latest release</span>
+          <span style="font-size:15px;font-weight:600">{{ latest.name }}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 14%, transparent);border-radius:6px;padding:3px 8px">{{ latest.v }}</span>
+          <span style="font-size:12.5px;color:var(--tx-3)">MC {{ latest.mc }} · {{ latest.date }}</span>
+          <span style="margin-left:auto"><span onClick="{{ latest.open }}" style="font-size:13px;color:var(--ac-text);cursor:pointer;white-space:nowrap">Versions &amp; changelog →</span></span>
+        </div>
+        <div style="padding:18px 22px 22px">
+          <ul style="margin:0;padding-left:18px;font-size:13.5px;color:var(--tx-2);line-height:1.8">
+            <sc-for list="{{ latest.notes }}" as="n" hint-placeholder-count="3"><li>{{ n }}</li></sc-for>
+          </ul>
+        </div>
+      </div>
+      </sc-if>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:20px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);padding:20px 22px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tx-3)">Recent updates</span>
+            <span onClick="{{ navUpdates }}" style="margin-left:auto;font-size:12.5px;color:var(--ac-text);cursor:pointer">All →</span>
+          </div>
+          <div style="display:flex;flex-direction:column;margin-top:6px">
+            <sc-for list="{{ recentUpdates }}" as="u" hint-placeholder-count="3">
+              <div onClick="{{ navUpdates }}" style="padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;gap:4px">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac-text)">{{ u.tag }}</span>
+                  <span style="font-size:11.5px;color:var(--tx-3)">{{ u.date }}</span>
+                </div>
+                <div style="font-size:13.5px;font-weight:500;line-height:1.45">{{ u.title }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);padding:20px 22px">
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--tx-3)">Elsewhere</div>
+          <div style="display:flex;flex-direction:column;margin-top:6px">
+            <sc-for list="{{ homeCards }}" as="c" hint-placeholder-count="4">
+              <div onClick="{{ c.click }}" style="padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer;display:flex;align-items:center;gap:12px" style-hover="color:var(--ac-text)">
+                <span style="font-size:13.5px;font-weight:500">{{ c.title }}</span>
+                <span style="font-size:12.5px;color:var(--tx-3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.desc }}</span>
+                <span style="color:var(--tx-3);font-size:14px">→</span>
+              </div>
+            </sc-for>
+            <a href="https://modrinth.com/user/FirestormFMD" target="_blank" style="padding:13px 0;display:flex;align-items:center;gap:12px;color:var(--tx)">
+              <span style="font-size:13.5px;font-weight:500">Modrinth</span>
+              <span style="font-size:12.5px;color:var(--tx-3);flex:1">Official project pages</span>
+              <span style="color:var(--tx-3);font-size:14px">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- ============ DOWNLOADS ============ -->
+  <sc-if value="{{ onDownloads }}" hint-placeholder-val="{{ false }}">
+  <main data-screen-label="Downloads" style="flex:1;width:100%;max-width:1040px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(16px,4vw,32px) 64px;animation:fmdIn .4s ease both">
+
+    <sc-if value="{{ showModList }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <h1 style="margin:0;font-size:clamp(26px,4.5vw,34px);font-weight:700;letter-spacing:-0.025em">Downloads</h1>
+      <p style="margin:10px 0 0;font-size:15px;color:var(--tx-2);line-height:1.6;max-width:62ch">Everything I've released, grouped by type. Most of it is also on <a href="https://modrinth.com/user/FirestormFMD" target="_blank">Modrinth ↗</a>.</p>
+
+      <sc-if value="{{ dlShowTabs }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:28px;border-bottom:1px solid var(--line);padding-bottom:0">
+        <sc-for list="{{ dlTabs }}" as="t" hint-placeholder-count="4">
+          <span onClick="{{ t.click }}" style="font-size:13.5px;padding:9px 13px;cursor:pointer;color:{{ t.color }};font-weight:{{ t.weight }};border-bottom:2px solid {{ t.line }};margin-bottom:-1px" style-hover="color:var(--tx)">{{ t.label }}</span>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <p style="margin:20px 0 0;font-size:13.5px;color:var(--tx-3);line-height:1.6">{{ dlBlurb }}</p>
+
+      <!-- Mods -->
+      <sc-if value="{{ dlOnMods }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+        <sc-for list="{{ mods }}" as="mod" hint-placeholder-count="3">
+          <div onClick="{{ mod.open }}" style="background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:16px 18px;display:flex;align-items:center;gap:16px;cursor:pointer;flex-wrap:wrap" style-hover="border-color:var(--ac-base)">
+            <sc-if value="{{ mod.hasIcon }}" hint-placeholder-val="{{ false }}"><img src="{{ mod.icon }}" alt="" style="width:44px;height:44px;border-radius:11px;flex:none;object-fit:cover"></sc-if>
+            <sc-if value="{{ mod.noIcon }}"><div style="width:44px;height:44px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent)">{{ mod.initials }}</div></sc-if>
+            <div style="flex:1;min-width:180px">
+              <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                <span style="font-size:15.5px;font-weight:600">{{ mod.name }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent);border-radius:6px;padding:2px 7px">{{ mod.latest }}</span>
+              </div>
+              <div style="font-size:13px;color:var(--tx-2);margin-top:5px;line-height:1.55">{{ mod.desc }}</div>
+            </div>
+            <div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+              <div style="font-size:11.5px;color:var(--tx-3);font-family:'JetBrains Mono',monospace">{{ mod.mcRange }}</div>
+              <div style="font-size:12.5px;color:var(--ac-text)">View versions →</div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noMods }}" hint-placeholder-val="{{ false }}"><p style="margin:8px 0 0;font-size:13.5px;color:var(--tx-3)">Nothing here yet — check back soon.</p></sc-if>
+      </div>
+      </sc-if>
+
+      <!-- Modpacks -->
+      <sc-if value="{{ dlOnModpacks }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+        <sc-for list="{{ modpacks }}" as="pack" hint-placeholder-count="2">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:16px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <sc-if value="{{ pack.hasIcon }}" hint-placeholder-val="{{ false }}"><img src="{{ pack.icon }}" alt="" style="width:44px;height:44px;border-radius:11px;flex:none;object-fit:cover"></sc-if>
+            <sc-if value="{{ pack.noIcon }}"><div style="width:44px;height:44px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent)">{{ pack.initials }}</div></sc-if>
+            <div style="flex:1;min-width:180px">
+              <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                <span style="font-size:15.5px;font-weight:600">{{ pack.name }}</span>
+                <sc-if value="{{ pack.hasVersion }}"><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent);border-radius:6px;padding:2px 7px">{{ pack.version }}</span></sc-if>
+              </div>
+              <div style="font-size:13px;color:var(--tx-2);margin-top:5px;line-height:1.55">{{ pack.desc }}</div>
+              <sc-if value="{{ pack.hasIncludes }}"><div style="font-size:12px;color:var(--tx-3);margin-top:6px">Includes {{ pack.includesText }}</div></sc-if>
+            </div>
+            <div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+              <div style="font-size:11.5px;color:var(--tx-3);font-family:'JetBrains Mono',monospace">{{ pack.mcRange }} · {{ pack.size }}</div>
+              <sc-if value="{{ pack.hasFile }}"><a href="{{ pack.file }}" download style="border:1px solid var(--line-2);color:var(--tx);font-size:12.5px;padding:7px 14px;border-radius:9px;background:var(--surface-2);white-space:nowrap" style-hover="border-color:var(--ac-base);color:var(--ac-text)">Download</a></sc-if>
+              <sc-if value="{{ pack.noFile }}"><span style="font-size:12px;color:var(--tx-3)">No file yet</span></sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noModpacks }}" hint-placeholder-val="{{ false }}"><p style="margin:8px 0 0;font-size:13.5px;color:var(--tx-3)">Nothing here yet — check back soon.</p></sc-if>
+      </div>
+      </sc-if>
+
+      <!-- Resource packs -->
+      <sc-if value="{{ dlOnResourcepacks }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+        <sc-for list="{{ resourcepacks }}" as="rp" hint-placeholder-count="2">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:16px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <sc-if value="{{ rp.hasIcon }}" hint-placeholder-val="{{ false }}"><img src="{{ rp.icon }}" alt="" style="width:44px;height:44px;border-radius:11px;flex:none;object-fit:cover"></sc-if>
+            <sc-if value="{{ rp.noIcon }}"><div style="width:44px;height:44px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent)">{{ rp.initials }}</div></sc-if>
+            <div style="flex:1;min-width:180px">
+              <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                <span style="font-size:15.5px;font-weight:600">{{ rp.name }}</span>
+                <sc-if value="{{ rp.hasVersion }}"><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent);border-radius:6px;padding:2px 7px">{{ rp.version }}</span></sc-if>
+                <sc-if value="{{ rp.hasResolution }}"><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--tx-2);border:1px solid var(--line-2);border-radius:6px;padding:2px 7px">{{ rp.resolution }}</span></sc-if>
+              </div>
+              <div style="font-size:13px;color:var(--tx-2);margin-top:5px;line-height:1.55">{{ rp.desc }}</div>
+            </div>
+            <div style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+              <div style="font-size:11.5px;color:var(--tx-3);font-family:'JetBrains Mono',monospace">{{ rp.mcRange }} · {{ rp.size }}</div>
+              <sc-if value="{{ rp.hasFile }}"><a href="{{ rp.file }}" download style="border:1px solid var(--line-2);color:var(--tx);font-size:12.5px;padding:7px 14px;border-radius:9px;background:var(--surface-2);white-space:nowrap" style-hover="border-color:var(--ac-base);color:var(--ac-text)">Download</a></sc-if>
+              <sc-if value="{{ rp.noFile }}"><span style="font-size:12px;color:var(--tx-3)">No file yet</span></sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noResourcepacks }}" hint-placeholder-val="{{ false }}"><p style="margin:8px 0 0;font-size:13.5px;color:var(--tx-3)">Nothing here yet — check back soon.</p></sc-if>
+      </div>
+      </sc-if>
+
+      <!-- WIPs -->
+      <sc-if value="{{ dlOnWips }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+        <sc-for list="{{ wips }}" as="w" hint-placeholder-count="2">
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:18px 20px">
+            <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+              <span style="font-size:15.5px;font-weight:600">{{ w.name }}</span>
+              <span style="font-size:13px;color:var(--tx-2)">{{ w.tagline }}</span>
+              <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--tx-3);white-space:nowrap">{{ w.stage }} · {{ w.percent }}%</span>
+            </div>
+            <div style="height:4px;border-radius:99px;background:var(--surface-2);margin-top:14px;overflow:hidden"><div style="width:{{ w.width }};height:100%;border-radius:99px;background:var(--ac-fill)"></div></div>
+            <div style="display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap">
+              <span style="font-size:13px;color:var(--tx-2);line-height:1.55;flex:1;min-width:200px">{{ w.note }}</span>
+              <sc-if value="{{ w.hasFile }}"><a href="{{ w.file }}" download style="border:1px solid var(--line-2);color:var(--tx);font-size:12.5px;padding:7px 14px;border-radius:9px;background:var(--surface-2);white-space:nowrap" style-hover="border-color:var(--ac-base);color:var(--ac-text)">Try preview</a></sc-if>
+              <sc-if value="{{ w.noFile }}"><span style="font-size:12px;color:var(--tx-3);white-space:nowrap">No build yet</span></sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noWips }}" hint-placeholder-val="{{ false }}"><p style="margin:8px 0 0;font-size:13.5px;color:var(--tx-3)">Nothing in progress right now.</p></sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ dlNoTabs }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:28px 0 0;font-size:14px;color:var(--tx-3)">No downloads are published right now.</p>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- Mod detail -->
+    <sc-if value="{{ showModDetail }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <span onClick="{{ backToMods }}" style="font-size:13px;color:var(--tx-3);cursor:pointer" style-hover="color:var(--tx)">← All mods</span>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap">
+        <sc-if value="{{ activeMod.hasIcon }}" hint-placeholder-val="{{ false }}"><img src="{{ activeMod.icon }}" alt="" style="width:52px;height:52px;border-radius:13px;flex:none;object-fit:cover"></sc-if>
+        <sc-if value="{{ activeMod.noIcon }}"><div style="width:52px;height:52px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:500;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent)">{{ activeMod.initials }}</div></sc-if>
+        <div style="min-width:200px">
+          <h1 style="margin:0;font-size:clamp(24px,4vw,30px);font-weight:700;letter-spacing:-0.025em">{{ activeMod.name }}</h1>
+          <p style="margin:7px 0 0;font-size:14px;color:var(--tx-2);line-height:1.55">{{ activeMod.desc }}</p>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);overflow:hidden">
+        <div style="padding:20px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line)">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500">{{ activeMod.featured.v }}</span>
+          <span style="font-size:10.5px;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;color:var(--ok);border:1px solid color-mix(in srgb, var(--ok) 40%, transparent);border-radius:5px;padding:2px 7px">LATEST</span>
+          <span style="font-size:12.5px;color:var(--tx-3)">MC {{ activeMod.featured.mc }} · {{ activeMod.featured.loader }} · {{ activeMod.featured.date }}</span>
+          <span style="margin-left:auto;display:flex;align-items:center;gap:12px">
+            <span style="font-size:11.5px;color:var(--tx-3);font-family:'JetBrains Mono',monospace">{{ activeMod.featured.size }}</span>
+            <sc-if value="{{ activeMod.featured.hasFile }}"><a href="{{ activeMod.featured.file }}" download style="background:var(--ac-fill);color:var(--ac-on);font-weight:600;font-size:13.5px;padding:10px 18px;border-radius:10px;white-space:nowrap" style-hover="filter:brightness(1.08);color:var(--ac-on)">Download .jar</a></sc-if>
+            <sc-if value="{{ activeMod.featured.noFile }}"><span style="font-size:12px;color:var(--tx-3);white-space:nowrap">No file yet</span></sc-if>
+          </span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px;padding:22px 24px 24px">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--tx-3);text-transform:uppercase;letter-spacing:0.08em">Changelog</div>
+            <ul style="margin:10px 0 0;padding-left:18px;font-size:13.5px;color:var(--tx-2);line-height:1.8">
+              <sc-for list="{{ activeMod.featured.notes }}" as="note" hint-placeholder-count="3"><li>{{ note }}</li></sc-for>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--tx-3);text-transform:uppercase;letter-spacing:0.08em">Required mods</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:11px">
+              <sc-for list="{{ activeMod.featured.deps }}" as="dep" hint-placeholder-count="2">
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:var(--tx-2)">{{ dep.name }}</span><span style="font-family:'JetBrains Mono',monospace;color:var(--tx-3);font-size:12px">{{ dep.ver }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:40px">
+        <div style="font-size:11px;font-weight:600;color:var(--tx-3);text-transform:uppercase;letter-spacing:0.08em">Previous versions</div>
+        <div style="margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden">
+          <sc-for list="{{ activeMod.versions }}" as="ver" hint-placeholder-count="4">
+            <div style="border-bottom:1px solid var(--line)">
+              <div onClick="{{ ver.toggle }}" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;flex-wrap:wrap" style-hover="background:color-mix(in srgb, var(--tx) 4%, transparent)">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:13px;min-width:60px">{{ ver.v }}</span>
+                <span style="font-size:12.5px;color:var(--tx-3);min-width:120px">MC {{ ver.mc }}</span>
+                <span style="font-size:12.5px;color:var(--tx-3)">{{ ver.date }}</span>
+                <span style="margin-left:auto;font-size:11.5px;color:var(--tx-3);font-family:'JetBrains Mono',monospace">{{ ver.size }}</span>
+                <span style="font-size:12.5px;color:var(--ac-text);white-space:nowrap">{{ ver.chevron }} Changelog</span>
+                <sc-if value="{{ ver.hasFile }}"><a href="{{ ver.file }}" download onClick="{{ ver.stop }}" style="border:1px solid var(--line-2);color:var(--tx);font-size:12px;padding:6px 13px;border-radius:8px;background:var(--surface-2);white-space:nowrap" style-hover="border-color:var(--ac-base);color:var(--ac-text)">Download</a></sc-if>
+              </div>
+              <sc-if value="{{ ver.open }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:0 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px;background:color-mix(in srgb, var(--tx) 3%, transparent)">
+                  <ul style="margin:0;padding:14px 0 0 18px;font-size:13px;color:var(--tx-2);line-height:1.75">
+                    <sc-for list="{{ ver.notes }}" as="note" hint-placeholder-count="2"><li>{{ note }}</li></sc-for>
+                  </ul>
+                  <div style="padding-top:14px">
+                    <div style="font-size:10.5px;font-weight:600;color:var(--tx-3);text-transform:uppercase;letter-spacing:0.08em">Required mods</div>
+                    <div style="display:flex;flex-direction:column;gap:7px;margin-top:9px">
+                      <sc-for list="{{ ver.deps }}" as="dep" hint-placeholder-count="2">
+                        <div style="display:flex;justify-content:space-between;gap:12px;font-size:12.5px"><span style="color:var(--tx-2)">{{ dep.name }}</span><span style="font-family:'JetBrains Mono',monospace;color:var(--tx-3);font-size:11.5px">{{ dep.ver }}</span></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- ============ UPDATES ============ -->
+  <sc-if value="{{ onUpdates }}" hint-placeholder-val="{{ false }}">
+  <main data-screen-label="Updates" style="flex:1;width:100%;max-width:760px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(16px,4vw,32px) 64px;animation:fmdIn .4s ease both">
+    <h1 style="margin:0;font-size:clamp(26px,4.5vw,34px);font-weight:700;letter-spacing:-0.025em">Updates</h1>
+    <p style="margin:10px 0 0;font-size:15px;color:var(--tx-2);line-height:1.6">Release notes and announcements.</p>
+    <div style="display:flex;flex-direction:column;margin-top:32px">
+      <sc-for list="{{ updates }}" as="u" hint-placeholder-count="3">
+      <div style="padding:26px 0;border-top:1px solid var(--line)">
+        <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ac-text);background:color-mix(in srgb, var(--ac-base) 13%, transparent);border-radius:6px;padding:3px 8px">{{ u.tag }}</span>
+          <span style="font-size:12px;color:var(--tx-3)">{{ u.date }}</span>
+        </div>
+        <h2 style="margin:13px 0 0;font-size:19px;font-weight:600;letter-spacing:-0.015em">{{ u.title }}</h2>
+        <p style="margin:9px 0 0;font-size:14px;color:var(--tx-2);line-height:1.65;text-wrap:pretty">{{ u.body }}</p>
+        <sc-if value="{{ u.hasLink }}"><span onClick="{{ u.click }}" style="display:inline-block;margin-top:13px;font-size:13px;color:var(--ac-text);cursor:pointer">{{ u.linkText }} →</span></sc-if>
+      </div>
+      </sc-for>
+      <sc-if value="{{ noUpdates }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:13.5px;color:var(--tx-3)">No announcements yet.</p></sc-if>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ BUGS ============ -->
+  <sc-if value="{{ onBugs }}" hint-placeholder-val="{{ false }}">
+  <main data-screen-label="Bug Tracker" style="flex:1;width:100%;max-width:1040px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(16px,4vw,32px) 64px;animation:fmdIn .4s ease both">
+    <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <h1 style="margin:0;font-size:clamp(26px,4.5vw,34px);font-weight:700;letter-spacing:-0.025em">Bug tracker</h1>
+        <p style="margin:10px 0 0;font-size:15px;color:var(--tx-2);line-height:1.6;max-width:60ch">Known issues across all mods. Check here before reporting a duplicate.</p>
+      </div>
+      <a href="https://modrinth.com/user/FirestormFMD" target="_blank" style="background:var(--ac-fill);color:var(--ac-on);font-weight:600;font-size:13.5px;padding:10px 18px;border-radius:10px;white-space:nowrap" style-hover="filter:brightness(1.08);color:var(--ac-on)">Report a bug</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:30px">
+      <sc-for list="{{ bugFilters }}" as="f" hint-placeholder-count="4">
+        <span onClick="{{ f.click }}" style="font-size:12.5px;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid {{ f.border }};color:{{ f.color }};background:{{ f.bg }};font-weight:{{ f.weight }}">{{ f.label }}</span>
+      </sc-for>
+    </div>
+    <div style="margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden">
+      <sc-for list="{{ bugs }}" as="bug" hint-placeholder-count="6">
+        <div style="display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap" style-hover="background:color-mix(in srgb, var(--tx) 4%, transparent)">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--tx-3);min-width:40px">{{ bug.id }}</span>
+          <span style="font-size:13.5px;flex:1;min-width:200px;line-height:1.45">{{ bug.title }}</span>
+          <span style="font-size:12px;color:var(--tx-3);white-space:nowrap">{{ bug.meta }}</span>
+          <span style="font-size:10.5px;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;padding:3px 9px;border-radius:99px;color:{{ bug.stColor }};background:{{ bug.stBg }};white-space:nowrap">{{ bug.status }}</span>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noBugs }}" hint-placeholder-val="{{ false }}"><div style="padding:20px;font-size:13.5px;color:var(--tx-3)">Nothing matches this filter.</div></sc-if>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ============ SOURCE ============ -->
+  <sc-if value="{{ onSource }}" hint-placeholder-val="{{ false }}">
+  <main data-screen-label="Source" style="flex:1;width:100%;max-width:1040px;margin:0 auto;padding:clamp(32px,5vw,56px) clamp(16px,4vw,32px) 64px;animation:fmdIn .4s ease both">
+    <h1 style="margin:0;font-size:clamp(26px,4.5vw,34px);font-weight:700;letter-spacing:-0.025em">Source</h1>
+    <p style="margin:10px 0 0;font-size:15px;color:var(--tx-2);line-height:1.6;max-width:60ch">Repositories and build files. Contributions and PRs welcome.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:32px">
+      <sc-for list="{{ sourceLinks }}" as="s" hint-placeholder-count="3">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);padding:18px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500">{{ s.name }}</div>
+          <div style="font-size:13px;color:var(--tx-2);margin-top:5px;line-height:1.55">{{ s.desc }}</div>
+        </div>
+        <span style="font-size:11.5px;color:var(--tx-3);font-family:'JetBrains Mono',monospace;white-space:nowrap">{{ s.meta }}</span>
+        <sc-if value="{{ s.hasUrl }}"><a href="{{ s.url }}" target="_blank" style="border:1px solid var(--line-2);color:var(--tx);font-size:12.5px;padding:7px 14px;border-radius:9px;background:var(--surface-2);white-space:nowrap" style-hover="border-color:var(--ac-base);color:var(--ac-text)">View repo ↗</a></sc-if>
+        <sc-if value="{{ s.noUrl }}"><span style="font-size:12px;color:var(--tx-3);white-space:nowrap">No link yet</span></sc-if>
+      </div>
+      </sc-for>
+      <sc-if value="{{ noSource }}" hint-placeholder-val="{{ false }}"><p style="margin:0;font-size:13.5px;color:var(--tx-3)">No repositories listed yet.</p></sc-if>
+    </div>
+  </main>
+  </sc-if>
+
+  <footer style="border-top:1px solid var(--line);margin-top:auto">
+    <div style="max-width:1040px;margin:0 auto;padding:20px clamp(16px,4vw,32px);display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--tx-3)">
+      <span>© 2026 {{ siteName }}</span>
+      <a href="https://modrinth.com/user/FirestormFMD" target="_blank" style="margin-left:auto;color:var(--tx-3)" style-hover="color:var(--tx)">modrinth.com/user/FirestormFMD</a>
+    </div>
+  </footer>
+</div>
+
+<!-- Shown while the bundle unpacks, so it uses the dark base — the mode a
+     first-time visitor lands in (site.defaultMode in data/mods.json). -->
+<template id="__bundler_thumbnail" data-bg-color="#212529">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#212529"></rect>
+    <rect x="460" y="290" width="280" height="220" rx="40" fill="#343a40" stroke="#4dabf7" stroke-width="6"></rect>
+    <text x="600" y="435" font-family="monospace" font-size="96" font-weight="700" fill="#f1f3f5" text-anchor="middle">FMD</text>
+  </svg>
+</template>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;homeLayout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;hero&quot;,&quot;dashboard&quot;],&quot;default&quot;:&quot;hero&quot;,&quot;tsType&quot;:&quot;'hero' | 'dashboard'&quot;,&quot;section&quot;:&quot;Design choices&quot;},&quot;defaultMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;,&quot;system&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'light' | 'dark' | 'system'&quot;,&quot;section&quot;:&quot;Defaults for a new visitor&quot;},&quot;defaultAccent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;red&quot;,&quot;pink&quot;,&quot;grape&quot;,&quot;violet&quot;,&quot;indigo&quot;,&quot;blue&quot;,&quot;cyan&quot;,&quot;teal&quot;,&quot;green&quot;,&quot;lime&quot;,&quot;yellow&quot;,&quot;orange&quot;],&quot;default&quot;:&quot;blue&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Defaults for a new visitor&quot;}}">
+const RAMPS = {
+  red:    ["#fff5f5","#ffe3e3","#ffc9c9","#ffa8a8","#ff8787","#ff6b6b","#fa5252","#f03e3e","#e03131","#c92a2a"],
+  pink:   ["#fff0f6","#ffdeeb","#fcc2d7","#faa2c1","#f783ac","#f06595","#e64980","#d6336c","#c2255c","#a61e4d"],
+  grape:  ["#f8f0fc","#f3d9fa","#eebefa","#e599f7","#da77f2","#cc5de8","#be4bdb","#ae3ec9","#9c36b5","#862e9c"],
+  violet: ["#f3f0ff","#e5dbff","#d0bfff","#b197fc","#9775fa","#845ef7","#7950f2","#7048e8","#6741d9","#5f3dc4"],
+  indigo: ["#edf2ff","#dbe4ff","#bac8ff","#91a7ff","#748ffc","#5c7cfa","#4c6ef5","#4263eb","#3b5bdb","#364fc7"],
+  blue:   ["#e7f5ff","#d0ebff","#a5d8ff","#74c0fc","#4dabf7","#339af0","#228be6","#1c7ed6","#1971c2","#1864ab"],
+  cyan:   ["#e3fafc","#c5f6fa","#99e9f2","#66d9e8","#3bc9db","#22b8cf","#15aabf","#1098ad","#0c8599","#0b7285"],
+  teal:   ["#e6fcf5","#c3fae8","#96f2d7","#63e6be","#38d9a9","#20c997","#12b886","#0ca678","#099268","#087f5b"],
+  green:  ["#ebfbee","#d3f9d8","#b2f2bb","#8ce99a","#69db7c","#51cf66","#40c057","#37b24d","#2f9e44","#2b8a3e"],
+  lime:   ["#f4fce3","#e9fac8","#d8f5a2","#c0eb75","#a9e34b","#94d82d","#82c91e","#74b816","#66a80f","#5c940d"],
+  yellow: ["#fff9db","#fff3bf","#ffec99","#ffe066","#ffd43b","#fcc419","#fab005","#f59f00","#f08c00","#e67700"],
+  orange: ["#fff4e6","#ffe8cc","#ffd8a8","#ffc078","#ffa94d","#ff922b","#fd7e14","#f76707","#e8590c","#d9480f"]
+};
+// Hues bright enough that a filled button needs dark text on it.
+const NEEDS_DARK = { cyan: 1, teal: 1, green: 1, lime: 1, yellow: 1, orange: 1 };
+const HUES = ["red","pink","grape","violet","indigo","blue","cyan","teal","green","lime","yellow","orange"];
+const isMode = (m) => m === "light" || m === "dark" || m === "system";
+
+const BASES = {
+  light: {
+    "--bg": "#f1f3f5", "--surface": "#f8f9fa", "--surface-2": "#e9ecef",
+    "--line": "#dee2e6", "--line-2": "#ced4da",
+    // #868e96 only clears 3:1 on a light page, so light mode steps the two
+    // secondary greys one stop darker and keeps #868e96 for dark mode only.
+    "--tx": "#212529", "--tx-2": "#343a40", "--tx-3": "#495057",
+    "--ok": "#2b8a3e", "--warn": "#d9480f",
+    "--sh": "0 1px 2px rgba(33,37,41,0.05)"
+  },
+  dark: {
+    "--bg": "#212529", "--surface": "#343a40", "--surface-2": "#495057",
+    "--line": "#495057", "--line-2": "#868e96",
+    "--tx": "#f1f3f5", "--tx-2": "#ced4da", "--tx-3": "#868e96",
+    "--ok": "#69db7c", "--warn": "#ffa94d",
+    "--sh": "0 1px 2px rgba(0,0,0,0.28)"
+  }
+};
+
+class Component extends DCLogic {
+  state = {
+    page: "home", selectedMod: null, openVersion: null, bugFilter: "All",
+    dlTab: null, remote: null,
+    mode: "light", accent: "blue", resolved: "light",
+    settingsOpen: false, navOpen: false, narrow: false,
+    homeLayout: "hero"
+  };
+
+  componentDidMount() {
+    const props = this.props || {};
+    let mode = props.defaultMode || "light";
+    let accent = props.defaultAccent || "blue";
+    let layout = props.homeLayout || "hero";
+    // Three sources, weakest first: the props baked into this file, the site
+    // defaults the owner set in the admin panel (mirrored into localStorage on
+    // the last visit so a repeat visitor paints correctly before mods.json
+    // lands), and the visitor's own pick, which always wins. Anything the
+    // visitor picked is pinned so the site defaults can't overwrite it later.
+    this._pinnedMode = false;
+    this._pinnedAccent = false;
+    try {
+      const sm = localStorage.getItem("fmd.siteMode");
+      const sa = localStorage.getItem("fmd.siteAccent");
+      const sl = localStorage.getItem("fmd.siteLayout");
+      if (isMode(sm)) mode = sm;
+      if (sa && RAMPS[sa]) accent = sa;
+      if (sl === "hero" || sl === "dashboard") layout = sl;
+
+      const m = localStorage.getItem("fmd.mode");
+      const a = localStorage.getItem("fmd.accent");
+      if (isMode(m)) { mode = m; this._pinnedMode = true; }
+      if (a && RAMPS[a]) { accent = a; this._pinnedAccent = true; }
+    } catch (e) {}
+
+    this._mq = window.matchMedia("(prefers-color-scheme: dark)");
+    this._onScheme = () => { if (this.state.mode === "system") this._apply(this.state.mode, this.state.accent); };
+    if (this._mq.addEventListener) this._mq.addEventListener("change", this._onScheme);
+
+    this._onResize = () => {
+      const narrow = window.innerWidth < 820;
+      if (narrow !== this.state.narrow) this.setState({ narrow, navOpen: narrow ? this.state.navOpen : false });
+    };
+    window.addEventListener("resize", this._onResize);
+
+    // Close the settings popover on any click outside it.
+    this._onDoc = (e) => {
+      if (!this.state.settingsOpen) return;
+      if (e.target.closest && e.target.closest("[data-settings-scope]")) return;
+      this.setState({ settingsOpen: false });
+    };
+    document.addEventListener("mousedown", this._onDoc);
+
+    this._onKey = (e) => { if (e.key === "Escape") this.setState({ settingsOpen: false, navOpen: false }); };
+    document.addEventListener("keydown", this._onKey);
+
+    this.setState({ mode, accent, homeLayout: layout, narrow: window.innerWidth < 820 });
+    this._apply(mode, accent);
+
+    // Cache-buster dodges the GitHub Pages edge cache after an update, but some
+    // hosts reject the extra query string — fall back to the bare path.
+    const load = (url) => fetch(url).then(r => (r.ok ? r.json() : Promise.reject(r.status)));
+    load("data/mods.json?t=" + Date.now())
+      .catch(() => load("data/mods.json"))
+      .then(d => { if (d) { this.setState({ remote: d }); this._siteDefaults(d.site || {}); } })
+      .catch(() => {});
+  }
+
+  // The owner's appearance defaults ride along in data/mods.json, so they only
+  // arrive after the first paint. Take whatever the visitor hasn't overridden
+  // and cache it for next time.
+  _siteDefaults(site) {
+    const s = this.state;
+    const mode = !this._pinnedMode && isMode(site.defaultMode) ? site.defaultMode : s.mode;
+    const accent = !this._pinnedAccent && RAMPS[site.defaultAccent] ? site.defaultAccent : s.accent;
+    const layout = !this._pinnedLayout && (site.homeLayout === "hero" || site.homeLayout === "dashboard") ? site.homeLayout : s.homeLayout;
+    try {
+      if (isMode(site.defaultMode)) localStorage.setItem("fmd.siteMode", site.defaultMode);
+      if (RAMPS[site.defaultAccent]) localStorage.setItem("fmd.siteAccent", site.defaultAccent);
+      if (site.homeLayout === "hero" || site.homeLayout === "dashboard") localStorage.setItem("fmd.siteLayout", site.homeLayout);
+    } catch (e) {}
+    if (mode !== s.mode || accent !== s.accent) this._apply(mode, accent);
+    this.setState({ mode, accent, homeLayout: layout });
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this._onResize);
+    document.removeEventListener("mousedown", this._onDoc);
+    document.removeEventListener("keydown", this._onKey);
+    if (this._mq && this._mq.removeEventListener) this._mq.removeEventListener("change", this._onScheme);
+  }
+
+  _resolve(mode) {
+    if (mode === "system") return this._mq && this._mq.matches ? "dark" : "light";
+    return mode;
+  }
+
+  // Theme is written straight onto :root as custom properties so every inline
+  // style in the template can stay a static literal (var(--x)) and paint instantly.
+  _apply(mode, accent) {
+    const scheme = this._resolve(mode);
+    const ramp = RAMPS[accent] || RAMPS.blue;
+    const dark = scheme === "dark";
+    const needsDark = !!NEEDS_DARK[accent];
+    const vars = Object.assign({}, BASES[scheme], {
+      "--ac-base": dark ? ramp[4] : ramp[6],
+      // Filled buttons: shade 5 on a dark page, shade 8 on a light one, so the
+      // label clears 4.5:1 either way. The six bright hues take dark labels.
+      "--ac-fill": dark ? ramp[5] : ramp[8],
+      "--ac-on": dark || needsDark ? "#212529" : "#f8f9fa",
+      // Accent-coloured text: the bright hues bottom out around 3:1 even at
+      // shade 9, so they get mixed toward ink until they clear AA.
+      "--ac-text": dark
+        ? ramp[3]
+        : (needsDark ? "color-mix(in srgb, " + ramp[9] + " 80%, #212529)" : ramp[8])
+    });
+    const root = document.documentElement;
+    for (const k in vars) root.style.setProperty(k, vars[k]);
+    root.style.colorScheme = scheme;
+    if (this.state.resolved !== scheme) this.setState({ resolved: scheme });
+  }
+
+  _setMode = (mode) => {
+    // Pin it so a late data/mods.json can't undo a choice already made.
+    this._pinnedMode = true;
+    try { localStorage.setItem("fmd.mode", mode); } catch (e) {}
+    this.setState({ mode });
+    this._apply(mode, this.state.accent);
+  };
+
+  _setAccent = (accent) => {
+    this._pinnedAccent = true;
+    try { localStorage.setItem("fmd.accent", accent); } catch (e) {}
+    this.setState({ accent });
+    this._apply(this.state.mode, accent);
+  };
+
+  data() {
+    const empty = { mods: [], modpacks: [], resourcepacks: [], wips: [], updates: [], bugs: [], source: [], site: {} };
+    return Object.assign({}, empty, this.state.remote || {});
+  }
+
+  renderVals() {
+    const s = this.state;
+    const page = s.page;
+    const d = this.data();
+    const site = Object.assign({
+      name: "FirestormFMD",
+      title: "FirestormFMD",
+      tagline: "Mods, modpacks, and even some things I can't put on Modrinth",
+      showMods: true, showModpacks: true, showResourcePacks: true
+    }, d.site || {});
+
+    const go = (p) => () => this.setState({ page: p, selectedMod: null, openVersion: null, navOpen: false, settingsOpen: false });
+
+    const pages = [["Home", "home"], ["Downloads", "downloads"], ["Updates", "updates"], ["Bugs", "bugs"], ["Source", "source"]];
+    const navItems = pages.map(([label, key]) => ({
+      label,
+      color: page === key ? "var(--tx)" : "var(--tx-3)",
+      weight: page === key ? "600" : "400",
+      bg: page === key ? "color-mix(in srgb, var(--tx) 6%, transparent)" : "transparent",
+      click: go(key)
+    }));
+
+    const withFile = (o) => Object.assign({ notes: [], deps: [] }, o, {
+      size: (o && o.size) || "",
+      file: (o && o.file) || "",
+      hasFile: !!(o && o.file),
+      noFile: !(o && o.file)
+    });
+    const withIcon = (o) => ({ icon: (o && o.icon) || "", hasIcon: !!(o && o.icon), noIcon: !(o && o.icon) });
+
+    const mods = (d.mods || []).map(m => {
+      const f = m.featured || {};
+      return Object.assign({}, m, withIcon(m), {
+        latest: f.v || "—",
+        mcRange: "MC " + (f.mc || "?"),
+        open: () => this.setState({ selectedMod: m.id, openVersion: null })
+      });
+    });
+    const modpacks = (d.modpacks || []).map(p => Object.assign(withFile(p), withIcon(p), {
+      mcRange: "MC " + (p.mc || "?"),
+      hasVersion: !!p.version,
+      includesText: (p.includes || []).join(" · "),
+      hasIncludes: !!(p.includes && p.includes.length)
+    }));
+    const resourcepacks = (d.resourcepacks || []).map(r => Object.assign(withFile(r), withIcon(r), {
+      mcRange: "MC " + (r.mc || "?"),
+      hasVersion: !!r.version,
+      resolution: r.resolution || "",
+      hasResolution: !!r.resolution
+    }));
+    const wips = (d.wips || []).map(w => {
+      const pct = Math.max(0, Math.min(100, Number(w.percent) || 0));
+      return Object.assign(withFile(w), { percent: pct, width: pct + "%" });
+    });
+
+    const activeRaw = (d.mods || []).find(m => m.id === s.selectedMod);
+    const activeMod = activeRaw ? Object.assign({}, activeRaw, withIcon(activeRaw), {
+      featured: withFile(activeRaw.featured || {}),
+      versions: (activeRaw.versions || []).map(v => Object.assign(withFile(v), {
+        open: s.openVersion === v.v,
+        chevron: s.openVersion === v.v ? "▾" : "▸",
+        toggle: () => this.setState(st => ({ openVersion: st.openVersion === v.v ? null : v.v })),
+        stop: (e) => e.stopPropagation()
+      }))
+    }) : null;
+
+    const updates = (d.updates || []).map(u => Object.assign({}, u, {
+      hasLink: !!u.link,
+      linkText: u.linkText || "More",
+      click: go(u.link || "home")
+    }));
+
+    const statusStyles = {
+      "OPEN": { c: "var(--warn)", b: "color-mix(in srgb, var(--warn) 16%, transparent)" },
+      "IN PROGRESS": { c: "var(--ac-text)", b: "color-mix(in srgb, var(--ac-base) 16%, transparent)" },
+      "FIXED": { c: "var(--ok)", b: "color-mix(in srgb, var(--ok) 16%, transparent)" }
+    };
+    const filter = s.bugFilter;
+    const bugs = (d.bugs || [])
+      .filter(b => filter === "All" || b.status === filter.toUpperCase())
+      .map(b => {
+        const st = statusStyles[b.status] || statusStyles.OPEN;
+        return Object.assign({}, b, { stColor: st.c, stBg: st.b });
+      });
+    const bugFilters = ["All", "Open", "In Progress", "Fixed"].map(f => ({
+      label: f,
+      click: () => this.setState({ bugFilter: f }),
+      border: filter === f ? "var(--ac-base)" : "var(--line)",
+      color: filter === f ? "var(--ac-text)" : "var(--tx-2)",
+      bg: filter === f ? "color-mix(in srgb, var(--ac-base) 12%, transparent)" : "var(--surface)",
+      weight: filter === f ? "600" : "400"
+    }));
+
+    const dlSections = [
+      { key: "mods", label: "Mods", on: site.showMods !== false, blurb: "Pick a mod to see its versions, changelogs and required mods." },
+      { key: "modpacks", label: "Modpacks", on: site.showModpacks !== false, blurb: "Ready-made bundles with sensible defaults — drop one in and play." },
+      { key: "resourcepacks", label: "Resource Packs", on: site.showResourcePacks !== false, blurb: "Textures and sounds. Drop the .zip into your resourcepacks folder." },
+      { key: "wips", label: "WIPs", on: (d.wips || []).length > 0, blurb: "Unfinished builds. Expect bugs — back up your worlds before testing." }
+    ].filter(x => x.on);
+    const dlActive = dlSections.some(x => x.key === s.dlTab) ? s.dlTab : (dlSections[0] || {}).key || null;
+    const dlTabs = dlSections.map(x => ({
+      label: x.label,
+      click: () => this.setState({ dlTab: x.key }),
+      color: dlActive === x.key ? "var(--tx)" : "var(--tx-3)",
+      weight: dlActive === x.key ? "600" : "400",
+      line: dlActive === x.key ? "var(--ac-fill)" : "transparent"
+    }));
+    const dlCurrent = dlSections.find(x => x.key === dlActive);
+
+    const modeOptions = ["light", "dark", "system"].map(m => ({
+      label: m === "light" ? "Light" : m === "dark" ? "Dark" : "Auto",
+      click: () => this._setMode(m),
+      color: s.mode === m ? "var(--tx)" : "var(--tx-3)",
+      bg: s.mode === m ? "var(--surface)" : "transparent",
+      weight: s.mode === m ? "600" : "400",
+      sh: s.mode === m ? "0 1px 2px rgba(0,0,0,0.12)" : "none"
+    }));
+    const accentOptions = HUES.map(h => ({
+      label: h.charAt(0).toUpperCase() + h.slice(1),
+      swatch: RAMPS[h][6],
+      click: () => this._setAccent(h),
+      ring: s.accent === h ? "0 0 0 2px var(--surface), 0 0 0 4px " + RAMPS[h][6] : "none"
+    }));
+    const layoutOptions = [["hero", "Centred"], ["dashboard", "Dashboard"]].map(([k, label]) => ({
+      label,
+      click: () => { this._pinnedLayout = true; this.setState({ homeLayout: k }); },
+      color: s.homeLayout === k ? "var(--tx)" : "var(--tx-3)",
+      bg: s.homeLayout === k ? "var(--surface)" : "transparent",
+      weight: s.homeLayout === k ? "600" : "400",
+      sh: s.homeLayout === k ? "0 1px 2px rgba(0,0,0,0.12)" : "none"
+    }));
+
+    const homeCards = [
+      { title: "Downloads", desc: "Mods, modpacks and resource packs — every version.", click: go("downloads"), badge: "", hasBadge: false },
+      { title: "Updates", desc: "Release notes and announcements.", click: go("updates"), badge: "", hasBadge: false },
+      { title: "Bug tracker", desc: "Known issues and what's already fixed.", click: go("bugs"), badge: String((d.bugs || []).filter(b => b.status !== "FIXED").length || ""), hasBadge: (d.bugs || []).some(b => b.status !== "FIXED") },
+      { title: "Source", desc: "Repositories and build files.", click: go("source"), badge: "", hasBadge: false }
+    ];
+
+    const firstMod = mods[0];
+    const latest = firstMod ? {
+      name: firstMod.name,
+      v: (firstMod.featured || {}).v || "",
+      mc: (firstMod.featured || {}).mc || "?",
+      date: (firstMod.featured || {}).date || "",
+      notes: ((firstMod.featured || {}).notes || []).slice(0, 3),
+      open: firstMod.open
+    } : null;
+
+    return {
+      siteName: site.name, siteTitle: site.title, siteTagline: site.tagline,
+      onHome: page === "home", onDownloads: page === "downloads", onUpdates: page === "updates",
+      onBugs: page === "bugs", onSource: page === "source",
+      navHome: go("home"), navDownloads: go("downloads"), navUpdates: go("updates"),
+      navItems,
+      wide: !s.narrow, narrow: s.narrow, navOpen: s.navOpen && s.narrow,
+      toggleNav: () => this.setState(st => ({ navOpen: !st.navOpen, settingsOpen: false })),
+      settingsOpen: s.settingsOpen,
+      toggleSettings: () => this.setState(st => ({ settingsOpen: !st.settingsOpen, navOpen: false })),
+      gearBg: s.settingsOpen ? "color-mix(in srgb, var(--tx) 6%, transparent)" : "var(--surface)",
+      modeOptions, accentOptions, layoutOptions,
+      accentLabel: (s.accent.charAt(0).toUpperCase() + s.accent.slice(1)) + " · " + (s.mode === "system" ? "auto (" + s.resolved + ")" : s.mode),
+      homeHero: s.homeLayout !== "dashboard",
+      homeDash: s.homeLayout === "dashboard",
+      homeCards, recentUpdates: updates.slice(0, 3),
+      latest: latest || { name: "", v: "", mc: "", date: "", notes: [], open: go("downloads") },
+      hasLatest: !!latest,
+      mods, modpacks, resourcepacks, wips, activeMod, updates,
+      sourceLinks: (d.source || []).map(x => Object.assign({}, x, { hasUrl: !!x.url, noUrl: !x.url })),
+      noMods: mods.length === 0, noModpacks: modpacks.length === 0,
+      noResourcepacks: resourcepacks.length === 0, noWips: wips.length === 0,
+      noUpdates: updates.length === 0, noBugs: bugs.length === 0,
+      noSource: (d.source || []).length === 0,
+      dlTabs, dlShowTabs: dlSections.length > 1, dlNoTabs: dlSections.length === 0,
+      dlBlurb: dlCurrent ? dlCurrent.blurb : "",
+      dlOnMods: dlActive === "mods", dlOnModpacks: dlActive === "modpacks",
+      dlOnResourcepacks: dlActive === "resourcepacks", dlOnWips: dlActive === "wips",
+      bugs, bugFilters,
+      showModList: page === "downloads" && !activeMod,
+      showModDetail: page === "downloads" && !!activeMod,
+      backToMods: () => this.setState({ selectedMod: null, openVersion: null })
+    };
+  }
+}
+</script>
+</body>
+</html>
