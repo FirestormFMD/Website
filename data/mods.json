@@ -1,7 +1,22 @@
 {
   "mods": [],
   "modpacks": [],
-  "resourcepacks": [],
+  "resourcepacks": [
+    {
+      "id": "lumin-16x",
+      "name": "Lumin 16x",
+      "initials": "L",
+      "accent": "blue",
+      "icon": null,
+      "desc": "",
+      "version": "1.13",
+      "mc": "1.16.4-26.2",
+      "resolution": "16x",
+      "date": "July 26, 2026",
+      "size": "1.3 MB",
+      "file": "files/resourcepacks/lumin-16x/6-lLumin-b16x.zip"
+    }
+  ],
   "wips": [],
   "updates": [],
   "source": [],
